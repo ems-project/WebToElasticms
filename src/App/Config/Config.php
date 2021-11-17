@@ -81,4 +81,15 @@ class Config
     {
         $this->analyzers = $analyzers;
     }
+
+    public function getAnalyzer(string $analyzerName): Analyzer
+    {
+        foreach ($this->analyzers as $analyzer) {
+            if ($analyzer->getName() === $analyzerName) {
+                return $analyzer;
+            }
+        }
+
+        throw new \RuntimeException(\sprintf('Analyzer %s not found', $analyzerName));
+    }
 }

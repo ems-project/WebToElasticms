@@ -24,6 +24,22 @@ The JSON config file list all web resources to synchronise for each document.
         }
       ]
     }
+  ],
+  "analyzers": [
+    {
+      "name": "infopage",
+      "type": "html",
+      "extractors": [
+        {
+          "selector": "div.field-name-body div.field-item",
+          "property": "[%locale%][body]"
+        },
+        {
+          "selector": "h1",
+          "property": "[%locale%][title]"
+        }
+      ]
+    }
   ]
 }
 ```

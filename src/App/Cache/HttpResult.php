@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Cache;
 
-use App\Config\WebResource;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpResult
@@ -15,4 +14,11 @@ class HttpResult
     {
         $this->response = $response;
     }
+
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
+    }
+
+
 }

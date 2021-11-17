@@ -28,17 +28,29 @@ class Extractor
     public function extractData(ProgressBar $createProgressBar): void
     {
         foreach ($this->config->getDocuments() as $document) {
+            $data = [];
             foreach ($document->getResources() as $resource) {
-                $this->extractDataFromResource($resource);
+                $this->extractDataFromResource($resource, $data);
             }
+            \dump($data);
             $createProgressBar->advance();
         }
         $createProgressBar->finish();
     }
 
-    private function extractDataFromResource(WebResource $resource): void
+    /**
+     * @param array<mixed> $data
+     */
+    private function extractDataFromResource(WebResource $resource, array &$data): void
     {
         $result = $this->cache->get($resource);
+        $analyzer = $this->config->getAnalyzer($resource->getType());
+        switch ($analyzer->getType()) {
+            case Html::TYPE:
+                Html::extract($resource, $result, $analyzer, $data);
 
+                return;
+        }
+        throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
     }
 }
