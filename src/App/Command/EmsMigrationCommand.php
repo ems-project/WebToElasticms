@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
+use App\Cache\Cache;
 use App\Config\Root;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
@@ -99,16 +102,10 @@ class EmsMigrationCommand extends AbstractCommand
     {
         $this->io->title('Starting updating elasticms');
         $this->io->section('Load config');
-        if (!\file_exists($this->jsonPath)) {
-            throw new \RuntimeException(\sprintf('Config file %s not found', $this->jsonPath));
-        }
-        $contents = \file_get_contents($this->jsonPath);
-        if (false === $contents) {
-            throw new \RuntimeException('Unexpected false config file');
-        }
-        $config = Root::deserialize($contents);
-        \dump($config);
+        $config = $this->loadConfig();
         $this->io->section('Refresh cache');
+        $cache = new Cache($config);
+        $this->io->section('Extract data');
         //TODO:
         $this->io->section('Update document');
         //TODO:
@@ -121,5 +118,18 @@ class EmsMigrationCommand extends AbstractCommand
         $username = $this->getArgumentString(self::ARG_USERNAME);
         $password = $this->getArgumentString(self::ARG_PASSWORD);
         $this->coreApi->authenticate($username, $password);
+    }
+
+    protected function loadConfig(): Root
+    {
+        if (!\file_exists($this->jsonPath)) {
+            throw new \RuntimeException(\sprintf('Config file %s not found', $this->jsonPath));
+        }
+        $contents = \file_get_contents($this->jsonPath);
+        if (false === $contents) {
+            throw new \RuntimeException('Unexpected false config file');
+        }
+
+        return Root::deserialize($contents);
     }
 }
