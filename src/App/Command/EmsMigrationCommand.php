@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Cache\Cache;
-use App\Config\Root;
+use App\Config\Config;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
@@ -120,7 +120,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->coreApi->authenticate($username, $password);
     }
 
-    protected function loadConfig(): Root
+    protected function loadConfig(): Config
     {
         if (!\file_exists($this->jsonPath)) {
             throw new \RuntimeException(\sprintf('Config file %s not found', $this->jsonPath));
@@ -130,6 +130,6 @@ class EmsMigrationCommand extends AbstractCommand
             throw new \RuntimeException('Unexpected false config file');
         }
 
-        return Root::deserialize($contents);
+        return Config::deserialize($contents);
     }
 }

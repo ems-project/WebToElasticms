@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-class Root
+class Config
 {
     /** @var Document[] */
     private array $documents;
@@ -20,9 +20,9 @@ class Root
         return self::getSerializer()->serialize($this, $format, [AbstractNormalizer::IGNORED_ATTRIBUTES => ['query']]);
     }
 
-    public static function deserialize(string $data, string $format = 'json'): Root
+    public static function deserialize(string $data, string $format = 'json'): Config
     {
-        $data = self::getSerializer()->deserialize($data, Root::class, $format);
+        $data = self::getSerializer()->deserialize($data, Config::class, $format);
 
         return $data;
     }

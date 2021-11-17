@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Cache;
 
-use App\Config\Root;
+use App\Config\Config;
 
 class Cache
 {
-    private Root $config;
+    private Config $config;
 
-    public function __construct(Root $config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
     }
