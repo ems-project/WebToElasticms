@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Cache\Cache;
 use App\Config\Config;
+use App\Extract\Extractor;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
@@ -108,14 +109,11 @@ class EmsMigrationCommand extends AbstractCommand
 
         $this->io->section('Load config');
         $config = $this->loadConfig();
-
-        $this->io->section('Refresh cache');
-        $cache = new Cache($config, $this->cacheFolder);
-        $cache->refresh($this->io->createProgressBar($cache->refreshMax()));
-        $this->io->writeln('');
+        $cache = new Cache($this->cacheFolder);
 
         $this->io->section('Extract data');
-        //TODO:
+        $extractor = new Extractor($config, $cache);
+        $extractor->extractData($this->io->createProgressBar($extractor->extractDataCount()));
 
         $this->io->section('Update document');
         //TODO:
