@@ -9,12 +9,10 @@ use Psr\Http\Message\ResponseInterface;
 
 class HttpResult
 {
-    private WebResource $resource;
-    private ResponseInterface $get;
+    private ResponseInterface $response;
 
-    public function __construct(WebResource $resource, ResponseInterface $get)
+    public function __construct(ResponseInterface $response)
     {
-        $this->resource = $resource;
-        $this->get = $get;
+        $this->response = $response;
     }
 }

@@ -109,13 +109,15 @@ class EmsMigrationCommand extends AbstractCommand
 
         $this->io->section('Load config');
         $config = $this->loadConfig();
+//        \dd($config);
         $cache = new Cache($this->cacheFolder);
 
         $this->io->section('Extract data');
         $extractor = new Extractor($config, $cache);
         $extractor->extractData($this->io->createProgressBar($extractor->extractDataCount()));
+        $this->io->writeln('');
 
-        $this->io->section('Update document');
+        $this->io->section('Update documents');
         //TODO:
 
         return self::EXECUTE_SUCCESS;

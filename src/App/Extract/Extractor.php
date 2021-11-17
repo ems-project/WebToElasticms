@@ -39,6 +39,6 @@ class Extractor
     private function extractDataFromResource(WebResource $resource): void
     {
         $result = $this->cache->get($resource);
-        \dump($result);
+
     }
 }

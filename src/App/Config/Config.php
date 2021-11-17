@@ -20,6 +20,11 @@ class Config
      */
     private array $documents;
 
+    /**
+     * @var Analyzer[]
+     */
+    private array $analyzers;
+
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
         return self::getSerializer()->serialize($this, $format);
@@ -59,5 +64,21 @@ class Config
     public function setDocuments(array $documents): void
     {
         $this->documents = $documents;
+    }
+
+    /**
+     * @return Analyzer[]
+     */
+    public function getAnalyzers(): array
+    {
+        return $this->analyzers;
+    }
+
+    /**
+     * @param Analyzer[] $analyzers
+     */
+    public function setAnalyzers(array $analyzers): void
+    {
+        $this->analyzers = $analyzers;
     }
 }

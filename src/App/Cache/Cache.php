@@ -35,6 +35,6 @@ class Cache
 
     public function get(WebResource $resource): HttpResult
     {
-        return new HttpResult($resource, $this->client->get($resource->getUrl()));
+        return new HttpResult($this->client->get($resource->getUrl()));
     }
 }
