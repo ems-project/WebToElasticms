@@ -28,6 +28,7 @@ class EmsMigrationCommand extends AbstractCommand
     private const ARG_HASH_ALGO = 'hash-algo';
     private const ARG_USERNAME = 'username';
     private const ARG_PASSWORD = 'password';
+    public const OPTION_CACHE_FOLDER = 'cache-folder';
     protected static $defaultName = 'ems:migrate';
     private ConsoleLogger $logger;
     private CoreApi $coreApi;
@@ -36,6 +37,7 @@ class EmsMigrationCommand extends AbstractCommand
     private MimeTypeGuesser $mimeTypeGuesser;
     private string $username;
     private StorageManager $storageManager;
+    private string $cacheFolder;
 
     protected function configure(): void
     {
@@ -59,7 +61,8 @@ class EmsMigrationCommand extends AbstractCommand
                 'sha1'
             )
             ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
-            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null);
+            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
+            ->addOption(self::OPTION_CACHE_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where cache will stored', \implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'WebToElasticms']));
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
@@ -68,6 +71,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->logger = new ConsoleLogger($output);
         $elasticmsUrl = $this->getArgumentString(self::ARG_ELASTICMS_URL);
         $this->jsonPath = $this->getArgumentString(self::ARG_CONFIG_FILE_PATH);
+        $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
         $hash = $this->getOptionString(self::ARG_HASH_ALGO);
         $client = new Client($elasticmsUrl, $this->logger);
         $fileLocator = new FileLocator();
@@ -104,7 +108,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->section('Load config');
         $config = $this->loadConfig();
         $this->io->section('Refresh cache');
-        $cache = new Cache($config);
+        $cache = new Cache($config, $this->cacheFolder);
         $this->io->section('Extract data');
         //TODO:
         $this->io->section('Update document');
