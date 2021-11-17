@@ -105,12 +105,18 @@ class EmsMigrationCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io->title('Starting updating elasticms');
+
         $this->io->section('Load config');
         $config = $this->loadConfig();
+
         $this->io->section('Refresh cache');
         $cache = new Cache($config, $this->cacheFolder);
+        $cache->refresh($this->io->createProgressBar($cache->refreshMax()));
+        $this->io->writeln('');
+
         $this->io->section('Extract data');
         //TODO:
+
         $this->io->section('Update document');
         //TODO:
 
