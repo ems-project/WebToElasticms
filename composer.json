@@ -3,7 +3,8 @@
     "symfony/console": "^4",
     "elasticms/common-bundle": "^1.8",
     "ext-sqlite3": "*",
-    "symfony/serializer": "^5.3"
+    "symfony/serializer": "^5.3",
+    "phpdocumentor/reflection-docblock": "^5.3"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.0",

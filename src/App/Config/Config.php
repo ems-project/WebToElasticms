@@ -4,27 +4,45 @@ declare(strict_types=1);
 
 namespace App\Config;
 
+use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 class Config
 {
-    /** @var Document[] */
+    /**
+     * @var Document[]
+     */
     private array $documents;
 
-    public function serialize(string $format = 'json'): string
+    public function serialize(string $format = JsonEncoder::FORMAT): string
     {
-        return self::getSerializer()->serialize($this, $format, [AbstractNormalizer::IGNORED_ATTRIBUTES => ['query']]);
+        return self::getSerializer()->serialize($this, $format);
     }
 
-    public static function deserialize(string $data, string $format = 'json'): Config
+    public static function deserialize(string $data, string $format = JsonEncoder::FORMAT): Config
     {
-        $data = self::getSerializer()->deserialize($data, Config::class, $format);
+        return self::getSerializer()->deserialize($data, Config::class, $format);
+    }
 
-        return $data;
+    private static function getSerializer(): Serializer
+    {
+        $reflectionExtractor = new ReflectionExtractor();
+        $phpDocExtractor = new PhpDocExtractor();
+        $propertyTypeExtractor = new PropertyInfoExtractor([$reflectionExtractor], [$phpDocExtractor, $reflectionExtractor], [$phpDocExtractor], [$reflectionExtractor], [$reflectionExtractor]);
+
+        return new Serializer([
+            new ArrayDenormalizer(),
+            new ObjectNormalizer(null, null, null, $propertyTypeExtractor),
+        ], [
+            new XmlEncoder(),
+            new JsonEncoder(),
+        ]);
     }
 
     /**
@@ -41,13 +59,5 @@ class Config
     public function setDocuments(array $documents): void
     {
         $this->documents = $documents;
-    }
-
-    private static function getSerializer(): Serializer
-    {
-        $encoders = [new XmlEncoder(), new JsonEncoder()];
-        $normalizers = [new ObjectNormalizer()];
-
-        return new Serializer($normalizers, $encoders);
     }
 }
