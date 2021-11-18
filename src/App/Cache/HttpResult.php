@@ -19,6 +19,4 @@ class HttpResult
     {
         return $this->response;
     }
-
-
 }
