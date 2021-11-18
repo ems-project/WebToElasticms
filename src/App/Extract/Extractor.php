@@ -47,10 +47,11 @@ class Extractor
         $analyzer = $this->config->getAnalyzer($resource->getType());
         switch ($analyzer->getType()) {
             case Html::TYPE:
-                Html::extract($resource, $result, $analyzer, $data);
-
-                return;
+                $extractor = new Html($this->config);
+                break;
+            default:
+                throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
         }
-        throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
+        $extractor->extract($resource, $result, $analyzer, $data);
     }
 }

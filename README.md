@@ -32,11 +32,20 @@ The JSON config file list all web resources to synchronise for each document.
       "extractors": [
         {
           "selector": "div.field-name-body div.field-item",
-          "property": "[%locale%][body]"
+          "property": "[%locale%][body]",
+          "filters": [
+            "trim",
+            "internal-link",
+            "style-cleaner"
+          ]
         },
         {
           "selector": "h1",
-          "property": "[%locale%][title]"
+          "property": "[%locale%][title]",
+          "filters": [
+            "striptags",
+            "trim"
+          ]
         }
       ]
     }

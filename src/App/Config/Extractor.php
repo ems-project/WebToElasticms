@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Config;
 
 class Extractor
 {
     private string $selector;
     private string $property;
+    /** @var string[] */
+    private array $filters = [];
 
     public function getSelector(): string
     {
@@ -25,5 +29,21 @@ class Extractor
     public function setProperty(string $property): void
     {
         $this->property = $property;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+
+    /**
+     * @param string[] $filters
+     */
+    public function setFilters(array $filters): void
+    {
+        $this->filters = $filters;
     }
 }
