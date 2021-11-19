@@ -17,8 +17,7 @@ class InternalLink
         $this->config = $config;
     }
 
-    public function process(Crawler $content): Crawler
+    public function process(Crawler $content): void
     {
-        return $content;
     }
 }

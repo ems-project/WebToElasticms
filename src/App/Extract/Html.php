@@ -63,7 +63,7 @@ class Html
                 default:
                     throw new \RuntimeException(\sprintf('Unexpected %s filter', $filterType));
             }
-            $content = $filter->process($content);
+            $filter->process($content);
         }
 
         return $content->html();

@@ -17,7 +17,7 @@ class StyleCleaner
         $this->config = $config;
     }
 
-    public function process(Crawler $content): Crawler
+    public function process(Crawler $content): void
     {
         foreach ($content->filter('[style]') as $item) {
             if (!$item instanceof \DOMElement) {
@@ -25,7 +25,5 @@ class StyleCleaner
             }
             $item->removeAttribute('style');
         }
-
-        return $content;
     }
 }
