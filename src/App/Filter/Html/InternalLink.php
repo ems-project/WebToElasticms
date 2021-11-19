@@ -38,9 +38,35 @@ class InternalLink
             if (!\in_array($url->getHost(), $this->config->getHosts())) {
                 continue;
             }
+            $path = $url->getPath();
+            if ($this->isLinkToRemove($item, $path)) {
+                continue;
+            }
             $path = $this->config->findInternalLink($url);
 
             $item->setAttribute($attribute, $path);
         }
+    }
+
+    private function isLinkToRemove(\DOMNode $item, string $path): bool
+    {
+        foreach ($this->config->getLinkToClean() as $regex) {
+            if (\preg_match($regex, $path)) {
+                $parent = $item->parentNode;
+                if (!$parent instanceof \DOMElement) {
+                    throw new \RuntimeException('Unexpected non DOMElement object');
+                }
+                $document = $item->ownerDocument;
+                if (!$document instanceof \DOMDocument) {
+                    throw new \RuntimeException('Unexpected non DOMDocument object');
+                }
+                $textNode = $document->createTextNode($item->nodeValue);
+                $parent->replaceChild($textNode, $item);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

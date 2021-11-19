@@ -31,6 +31,8 @@ class Config
 
     /** @var string[] */
     private $validClasses = [];
+    /** @var string[] */
+    private $linkToClean = [];
     private StorageManager $storageManager;
     private Cache $cache;
     private CoreApi $coreApi;
@@ -217,5 +219,21 @@ class Config
     public function specifyLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLinkToClean(): array
+    {
+        return $this->linkToClean;
+    }
+
+    /**
+     * @param string[] $linkToClean
+     */
+    public function setLinkToClean(array $linkToClean): void
+    {
+        $this->linkToClean = $linkToClean;
     }
 }
