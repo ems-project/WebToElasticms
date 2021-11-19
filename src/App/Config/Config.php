@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Config;
 
+use App\Cache\Cache;
+use EMS\CommonBundle\Common\CoreApi\CoreApi;
+use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -26,6 +29,9 @@ class Config
 
     /** @var string[] */
     private $validClasses = [];
+    private StorageManager $storageManager;
+    private Cache $cache;
+    private CoreApi $coreApi;
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -138,5 +144,20 @@ class Config
     public function setValidClasses(array $validClasses): void
     {
         $this->validClasses = $validClasses;
+    }
+
+    public function specifyStorageManager(StorageManager $storageManager): void
+    {
+        $this->storageManager = $storageManager;
+    }
+
+    public function specifyCacheManager(Cache $cache): void
+    {
+        $this->cache = $cache;
+    }
+
+    public function specifyCoreClientManager(CoreApi $coreApi): void
+    {
+        $this->coreApi = $coreApi;
     }
 }
