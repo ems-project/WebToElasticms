@@ -32,7 +32,7 @@ class Html
         $crawler = new Crawler($result->getResponse()->getBody()->getContents());
         foreach ($analyzer->getExtractors() as $extractor) {
             $content = $crawler->filter($extractor->getSelector());
-            $html = $this->applyFilters($content, $extractor);
+            $html = $this->applyFilters($resource, $content, $extractor);
             $this->assignProperty($resource, $extractor, $data, $html);
         }
     }
@@ -47,7 +47,7 @@ class Html
         $propertyAccessor->setValue($data, $property, $html);
     }
 
-    private function applyFilters(Crawler $content, \App\Config\Extractor $extractor): string
+    private function applyFilters(WebResource $resource, Crawler $content, \App\Config\Extractor $extractor): string
     {
         $asHtml = true;
         foreach ($extractor->getFilters() as $filterType) {
@@ -57,7 +57,7 @@ class Html
                     $asHtml = false;
                     break;
                 case InternalLink::TYPE:
-                    $filter = new InternalLink($this->config);
+                    $filter = new InternalLink($this->config, $resource->getUrl());
                     break;
                 case StyleCleaner::TYPE:
                     $filter = new StyleCleaner($this->config);

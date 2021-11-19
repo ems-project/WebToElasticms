@@ -15,15 +15,14 @@ use Symfony\Component\Serializer\Serializer;
 
 class Config
 {
-    /**
-     * @var Document[]
-     */
+    /** @var Document[] */
     private array $documents;
 
-    /**
-     * @var Analyzer[]
-     */
+    /** @var Analyzer[] */
     private array $analyzers;
+
+    /** @var string[] */
+    private array $hosts = [];
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -91,5 +90,34 @@ class Config
         }
 
         throw new \RuntimeException(\sprintf('Analyzer %s not found', $analyzerName));
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getHosts(): array
+    {
+        return $this->hosts;
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    public function setHosts(array $hosts): void
+    {
+        $this->hosts = $hosts;
+    }
+
+    public function findInternalLink(string $path, ?string $fragment = null, ?string $query = null): string
+    {
+        $path = 'ems://object:page:ouuid';
+        if (null !== $fragment) {
+            $path .= '#'.$fragment;
+        }
+        if (null !== $query) {
+            $path .= '?'.$query;
+        }
+
+        return $path;
     }
 }
