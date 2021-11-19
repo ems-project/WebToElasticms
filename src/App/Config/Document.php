@@ -9,7 +9,7 @@ class Document
     /** @var WebResource[] */
     private array $resources;
     private string $type;
-    private ?string $ouuid;
+    private ?string $ouuid = null;
 
     /**
      * @return WebResource[]

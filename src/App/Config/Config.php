@@ -8,6 +8,7 @@ use App\Cache\Cache;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
 use EMS\CommonBundle\Storage\StorageManager;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -33,6 +34,7 @@ class Config
     private StorageManager $storageManager;
     private Cache $cache;
     private CoreApi $coreApi;
+    private LoggerInterface $logger;
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -107,6 +109,16 @@ class Config
      */
     public function getHosts(): array
     {
+        if (empty($this->hosts)) {
+            foreach ($this->documents as $document) {
+                foreach ($document->getResources() as $resource) {
+                    $url = new Url($resource->getUrl());
+                    if (!in_array($url->getHost(), $this->hosts)) {
+                        $this->hosts[] = $url->getHost();
+                    }
+                }
+            }
+        }
         return $this->hosts;
     }
 
@@ -124,8 +136,11 @@ class Config
         if (null === $path && null === $url->getFragment() && $url->getQuery()) {
             $path = $this->downloadAsset($url);
         }
+        if (null === $path) {
+            $path = $url->getPath();
+            $this->logger->warning(\sprintf('It was not possible to convert the path %s', $path));
+        }
 
-        $path = 'ems://object:page:ouuid';
         if (null !== $url->getFragment()) {
             $path .= '#'.$url->getFragment();
         }
@@ -188,5 +203,10 @@ class Config
     private function downloadAsset(Url $url): ?string
     {
         return null;
+    }
+
+    public function specifyLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 }

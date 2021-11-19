@@ -113,6 +113,7 @@ class EmsMigrationCommand extends AbstractCommand
         $config->specifyStorageManager($this->storageManager);
         $config->specifyCacheManager($cache);
         $config->specifyCoreClientManager($this->coreApi);
+        $config->specifyLogger($this->logger);
 
         $this->io->section('Extract data');
         $extractor = new Extractor($config, $cache);
