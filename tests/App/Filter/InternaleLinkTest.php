@@ -22,6 +22,7 @@ class InternaleLinkTest extends TestCase
 <div style="padding: inherit;"><a href="//demo.com/toto/link">Url</a></div>
 <div style="padding: inherit;"><a href="/toto/link">Absolute link</a></div>
 <div style="padding: inherit;"><a href="../../toto/link">Absolute link</a></div>
+<div style="padding: inherit;"><img src="../asset/images/test.png"></div>
 <div style="padding: inherit;"><a href="https://www.google.com">Google</a></div>
 <div style="padding: inherit;"><a href="//www.google.com">Google</a></div>');
 
@@ -31,6 +32,7 @@ class InternaleLinkTest extends TestCase
 <div style="padding: inherit;"><a href="ems://object:page:ouuid">Url</a></div>
 <div style="padding: inherit;"><a href="ems://object:page:ouuid">Absolute link</a></div>
 <div style="padding: inherit;"><a href="ems://object:page:ouuid">Absolute link</a></div>
+<div style="padding: inherit;"><img src="ems://object:page:ouuid"></div>
 <div style="padding: inherit;"><a href="https://www.google.com">Google</a></div>
 <div style="padding: inherit;"><a href="//www.google.com">Google</a></div>', $crawler->filter('body')->html());
     }
