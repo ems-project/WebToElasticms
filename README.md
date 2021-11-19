@@ -34,21 +34,21 @@ The JSON config file list all web resources to synchronise for each document.
           "selector": "div.field-name-body div.field-item",
           "property": "[%locale%][body]",
           "filters": [
-            "trim",
             "internal-link",
-            "style-cleaner"
+            "style-cleaner",
+            "class-cleaner"
           ]
         },
         {
           "selector": "h1",
           "property": "[%locale%][title]",
           "filters": [
-            "striptags",
-            "trim"
+            "striptags"
           ]
         }
       ]
     }
-  ]
+  ],
+  "validClasses": ["toc"]
 }
 ```

@@ -24,6 +24,9 @@ class Config
     /** @var string[] */
     private array $hosts = [];
 
+    /** @var string[] */
+    private $validClasses = [];
+
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
         return self::getSerializer()->serialize($this, $format);
@@ -119,5 +122,21 @@ class Config
         }
 
         return $path;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getValidClasses(): array
+    {
+        return $this->validClasses;
+    }
+
+    /**
+     * @param string[] $validClasses
+     */
+    public function setValidClasses(array $validClasses): void
+    {
+        $this->validClasses = $validClasses;
     }
 }

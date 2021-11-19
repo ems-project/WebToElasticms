@@ -8,6 +8,7 @@ use App\Cache\HttpResult;
 use App\Config\Analyzer;
 use App\Config\Config;
 use App\Config\WebResource;
+use App\Filter\Html\ClassCleaner;
 use App\Filter\Html\InternalLink;
 use App\Filter\Html\Striptag;
 use App\Filter\Html\StyleCleaner;
@@ -61,6 +62,9 @@ class Html
                     break;
                 case StyleCleaner::TYPE:
                     $filter = new StyleCleaner($this->config);
+                    break;
+                case ClassCleaner::TYPE:
+                    $filter = new ClassCleaner($this->config);
                     break;
                 default:
                     throw new \RuntimeException(\sprintf('Unexpected %s filter', $filterType));
