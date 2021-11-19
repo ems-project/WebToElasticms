@@ -13,8 +13,12 @@ class InternaleLinkTest extends TestCase
 {
     public function testInternalLink(): void
     {
-        $config = new Config();
-        $config->setHosts(['demo.com']);
+        $config = $this->createMock(Config::class);
+        $config->method('getHosts')
+            ->willReturn(['demo.com']);
+        $config->method('findInternalLink')
+            ->willReturn('ems://object:page:ouuid');
+
         $internalLink = new InternalLink($config, 'https://demo.com/a/b');
 
         $crawler = new Crawler(
