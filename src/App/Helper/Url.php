@@ -132,4 +132,15 @@ class Url
     {
         return $this->fragment;
     }
+
+    public function getFilename(): string
+    {
+        $exploded = \explode('/', $this->path);
+        $name = \array_pop($exploded);
+        if ('' === $name) {
+            return 'index.html';
+        }
+
+        return $name;
+    }
 }
