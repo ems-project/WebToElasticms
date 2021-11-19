@@ -4,8 +4,13 @@ if (!file_exists(__DIR__.'/src')) {
     exit(0);
 }
 
+if (!file_exists(__DIR__.'/tests')) {
+    exit(0);
+}
+
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__.'/src')
+    ->in(__DIR__.'/tests')
 ;
 
 $config = new PhpCsFixer\Config();

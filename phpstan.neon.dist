@@ -2,6 +2,7 @@
 parameters:
     paths:
         - %currentWorkingDirectory%/src
+        - %currentWorkingDirectory%/tests
         - %currentWorkingDirectory%/application.php
     reportUnmatchedIgnoredErrors: false
     level: 8
