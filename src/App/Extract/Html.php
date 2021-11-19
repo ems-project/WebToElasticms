@@ -49,10 +49,12 @@ class Html
 
     private function applyFilters(Crawler $content, \App\Config\Extractor $extractor): string
     {
+        $asHtml = true;
         foreach ($extractor->getFilters() as $filterType) {
             switch ($filterType) {
                 case Striptag::TYPE:
                     $filter = new Striptag($this->config);
+                    $asHtml = false;
                     break;
                 case InternalLink::TYPE:
                     $filter = new InternalLink($this->config);
@@ -66,6 +68,6 @@ class Html
             $filter->process($content);
         }
 
-        return $content->html();
+        return $asHtml ? $content->html() : $content->text();
     }
 }

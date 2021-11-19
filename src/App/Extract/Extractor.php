@@ -32,7 +32,6 @@ class Extractor
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
             }
-            \dump($data);
             $createProgressBar->advance();
         }
         $createProgressBar->finish();

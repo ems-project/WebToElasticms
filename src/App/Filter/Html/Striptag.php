@@ -19,5 +19,8 @@ class Striptag
 
     public function process(Crawler $content): void
     {
+        $text = $content->text();
+        $content->clear();
+        $content->addHtmlContent($text);
     }
 }
