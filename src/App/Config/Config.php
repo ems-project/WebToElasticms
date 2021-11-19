@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Config;
 
 use App\Cache\Cache;
+use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
@@ -117,14 +118,19 @@ class Config
         $this->hosts = $hosts;
     }
 
-    public function findInternalLink(string $path, ?string $fragment = null, ?string $query = null): string
+    public function findInternalLink(Url $url): string
     {
-        $path = 'ems://object:page:ouuid';
-        if (null !== $fragment) {
-            $path .= '#'.$fragment;
+        $path = $this->findInDocuments($url);
+        if (null === $path && null === $url->getFragment() && $url->getQuery()) {
+            $path = $this->downloadAsset($url);
         }
-        if (null !== $query) {
-            $path .= '?'.$query;
+
+        $path = 'ems://object:page:ouuid';
+        if (null !== $url->getFragment()) {
+            $path .= '#'.$url->getFragment();
+        }
+        if (null !== $url->getQuery()) {
+            $path .= '?'.$url->getQuery();
         }
 
         return $path;
@@ -159,5 +165,28 @@ class Config
     public function specifyCoreClientManager(CoreApi $coreApi): void
     {
         $this->coreApi = $coreApi;
+    }
+
+    private function findInDocuments(Url $url): ?string
+    {
+        foreach ($this->documents as $document) {
+            $ouuid = $document->getOuuid();
+            if (null === $ouuid) {
+                continue;
+            }
+            foreach ($document->getResources() as $resource) {
+                $resourceUrl = new Url($resource->getUrl());
+                if ($resourceUrl->getPath() === $url->getPath()) {
+                    return \implode(':', [$document->getType(), $document->getOuuid()]);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function downloadAsset(Url $url): ?string
+    {
+        return null;
     }
 }

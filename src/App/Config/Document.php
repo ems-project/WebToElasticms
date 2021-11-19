@@ -8,6 +8,8 @@ class Document
 {
     /** @var WebResource[] */
     private array $resources;
+    private string $type;
+    private ?string $ouuid;
 
     /**
      * @return WebResource[]
@@ -23,5 +25,28 @@ class Document
     public function setResources(array $resources): void
     {
         $this->resources = $resources;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): void
+    {
+        $this->type = $type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOuuid(): ?string
+    {
+        return $this->ouuid;
+    }
+
+    public function setOuuid(?string $ouuid): void
+    {
+        $this->ouuid = $ouuid;
     }
 }
