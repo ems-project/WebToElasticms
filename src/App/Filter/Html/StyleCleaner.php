@@ -19,6 +19,13 @@ class StyleCleaner
 
     public function process(Crawler $content): Crawler
     {
+        foreach ($content->filter('[style]') as $item) {
+            if (!$item instanceof \DOMElement) {
+                throw new \RuntimeException('Unexpected non DOMElement object');
+            }
+            $item->removeAttribute('style');
+        }
+
         return $content;
     }
 }
