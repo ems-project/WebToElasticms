@@ -11,7 +11,7 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class StriptagTest extends TestCase
 {
-    public function testCleaning(): void
+    public function testStriptag(): void
     {
         $config = new Config();
         $styleCleaner = new Striptag($config);
@@ -22,7 +22,7 @@ class StriptagTest extends TestCase
         $this->assertEquals('foobar è €', $crawler->text());
     }
 
-    public function testCleaningWithManyStyles(): void
+    public function testStriptagWithManyStyles(): void
     {
         $config = new Config();
         $styleCleaner = new Striptag($config);
