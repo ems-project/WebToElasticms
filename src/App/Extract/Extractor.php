@@ -32,7 +32,7 @@ class Extractor
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
             }
-            dd($data);
+            \dd($data);
             $createProgressBar->advance();
         }
         $createProgressBar->finish();
@@ -43,7 +43,7 @@ class Extractor
      */
     private function extractDataFromResource(WebResource $resource, array &$data): void
     {
-        $result = $this->cache->get($resource);
+        $result = $this->cache->get($resource->getUrl());
         $analyzer = $this->config->getAnalyzer($resource->getType());
         switch ($analyzer->getType()) {
             case Html::TYPE:

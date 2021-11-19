@@ -113,12 +113,13 @@ class Config
             foreach ($this->documents as $document) {
                 foreach ($document->getResources() as $resource) {
                     $url = new Url($resource->getUrl());
-                    if (!in_array($url->getHost(), $this->hosts)) {
+                    if (!\in_array($url->getHost(), $this->hosts)) {
                         $this->hosts[] = $url->getHost();
                     }
                 }
             }
         }
+
         return $this->hosts;
     }
 
@@ -133,7 +134,7 @@ class Config
     public function findInternalLink(Url $url): string
     {
         $path = $this->findInDocuments($url);
-        if (null === $path && null === $url->getFragment() && $url->getQuery()) {
+        if (null === $path && null === $url->getFragment() && null === $url->getQuery()) {
             $path = $this->downloadAsset($url);
         }
         if (null === $path) {
@@ -202,7 +203,15 @@ class Config
 
     private function downloadAsset(Url $url): ?string
     {
-        return null;
+        $asset = $this->cache->get($url->getUrl());
+        $mimeType = $asset->getMimetype();
+        if (false !== \strpos($mimeType, 'text/html')) {
+            return null;
+        }
+        $filename = $url->getFilename();
+        $hash = $this->coreApi->file()->uploadStream($asset->getStream(), $filename, $mimeType);
+
+        return \sprintf('ems://asset:%s?name=%s&type=%s', $hash, \urlencode($filename), \urlencode($mimeType));
     }
 
     public function specifyLogger(LoggerInterface $logger): void

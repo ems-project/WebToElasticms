@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Cache;
 
-use App\Config\WebResource;
 use Doctrine\Common\Cache\FilesystemCache;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -33,8 +32,8 @@ class Cache
         $this->client = new Client(['handler' => $stack]);
     }
 
-    public function get(WebResource $resource): HttpResult
+    public function get(string $url): HttpResult
     {
-        return new HttpResult($this->client->get($resource->getUrl()));
+        return new HttpResult($this->client->get($url));
     }
 }
