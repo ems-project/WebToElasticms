@@ -23,6 +23,7 @@
   "scripts": {
     "phpcs": "php-cs-fixer fix",
     "phpstan": "phpstan analyse",
-    "phpunit": "phpunit"
+    "phpunit": "phpunit",
+    "phpall": "phpunit && php-cs-fixer fix && phpstan analyse"
   }
 }
