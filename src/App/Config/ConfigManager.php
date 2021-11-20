@@ -265,6 +265,18 @@ class ConfigManager
         }
         $this->expressionLanguage = new ExpressionLanguage();
 
+        $this->expressionLanguage->register('uuid', function () {
+            return '(\\Ramsey\\Uuid\\Uuid::uuid4()->toString())';
+        }, function ($arguments) {
+            return \Ramsey\Uuid\Uuid::uuid4()->toString();
+        });
+
+        $this->expressionLanguage->register('json_escape', function ($str) {
+            return \sprintf('(\\EMS\\CommonBundle\\Common\\Standard\\Json::escape(%1$s))', $str);
+        }, function ($arguments, $str) {
+            return \EMS\CommonBundle\Common\Standard\Json::escape($str);
+        });
+
         return $this->expressionLanguage;
     }
 }

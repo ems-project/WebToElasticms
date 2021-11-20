@@ -75,3 +75,15 @@ This filter remove all style attribute.
 ### striptags
 
 This filter extract the text and remove all the rest
+
+## Types
+
+### Computer
+
+#### Expression
+
+Those parameters are using the [Symfony expression syntax](https://symfony.com/doc/current/components/expression_language/syntax.html)
+
+Functions available: 
+ - `uuid()`: generate a unique identifier
+ - `json_escape(str)`: JSON escape a string 
