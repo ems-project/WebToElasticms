@@ -23,17 +23,12 @@ class ExpressionData
     }
 
     /**
-     * @param mixed|null $default
-     *
      * @return mixed|null
      */
-    public function get(string $path, $default = null)
+    public function get(string $path)
     {
         $property = Document::fieldPathToPropertyPath($path);
-        if ($this->propertyAccessor->isReadable($this->data, $property)) {
-            return $this->propertyAccessor->getValue($this->data, $property);
-        }
 
-        return $default;
+        return $this->propertyAccessor->getValue($this->data, $property);
     }
 }
