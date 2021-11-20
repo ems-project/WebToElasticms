@@ -7,6 +7,7 @@ class Computer
     private string $property;
     private string $expression;
     private bool $jsonDecode = false;
+    private string $condition = 'true';
 
     public function getProperty(): string
     {
@@ -36,5 +37,15 @@ class Computer
     public function setJsonDecode(bool $jsonDecode): void
     {
         $this->jsonDecode = $jsonDecode;
+    }
+
+    public function getCondition(): string
+    {
+        return $this->condition;
+    }
+
+    public function setCondition(string $condition): void
+    {
+        $this->condition = $condition;
     }
 }

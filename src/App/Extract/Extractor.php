@@ -47,6 +47,9 @@ class Extractor
 
             $type = $this->config->getType($document->getType());
             foreach ($type->getComputers() as $computer) {
+                if (!$this->condition($computer, $data)) {
+                    continue;
+                }
                 $value = $this->compute($computer, $data);
                 $this->assignComputedProperty($computer, $data, $value);
             }
@@ -82,12 +85,27 @@ class Extractor
 
     /**
      * @param array<mixed> $data
+     */
+    private function condition(Computer $computer, array &$data): bool
+    {
+        $condition = $this->expressionLanguage->evaluate($computer->getCondition(), $context = [
+            'data' => new ExpressionData($data),
+        ]);
+        if (!\is_bool($condition)) {
+            throw new \RuntimeException(\sprintf('Condition "%s" must return a boolean', $computer->getCondition()));
+        }
+
+        return $condition;
+    }
+
+    /**
+     * @param array<mixed> $data
      *
      * @return mixed
      */
     private function compute(Computer $computer, array &$data)
     {
-        $value = $this->expressionLanguage->evaluate($computer->getExpression(), [
+        $value = $this->expressionLanguage->evaluate($computer->getExpression(), $context = [
             'data' => new ExpressionData($data),
         ]);
 
