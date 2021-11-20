@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Filter\Html;
 
-use App\Config\Config;
+use App\Config\ConfigManager;
 use App\Helper\Url;
 use Symfony\Component\DomCrawler\Crawler;
 
 class InternalLink
 {
     public const TYPE = 'internal-link';
-    private Config $config;
+    private ConfigManager $config;
     private string $currentUrl;
 
-    public function __construct(Config $config, string $currentUrl)
+    public function __construct(ConfigManager $config, string $currentUrl)
     {
         $this->config = $config;
         $this->currentUrl = $currentUrl;

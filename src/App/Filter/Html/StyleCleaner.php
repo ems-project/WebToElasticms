@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filter\Html;
 
-use App\Config\Config;
+use App\Config\ConfigManager;
 use Symfony\Component\DomCrawler\Crawler;
 
 class StyleCleaner
 {
     public const TYPE = 'style-cleaner';
-    private Config $config;
+    private ConfigManager $config;
 
-    public function __construct(Config $config)
+    public function __construct(ConfigManager $config)
     {
         $this->config = $config;
     }

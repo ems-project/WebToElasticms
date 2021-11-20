@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Cache\Cache;
-use App\Config\Config;
+use App\Cache\CacheManager;
+use App\Config\ConfigManager;
 use App\Extract\Extractor;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
@@ -109,19 +109,20 @@ class EmsMigrationCommand extends AbstractCommand
 
         $this->io->section('Load config');
         $config = $this->loadConfig();
-        $cache = new Cache($this->cacheFolder);
+        $cache = new CacheManager($this->cacheFolder);
         $config->specifyStorageManager($this->storageManager);
         $config->specifyCacheManager($cache);
         $config->specifyCoreClientManager($this->coreApi);
         $config->specifyLogger($this->logger);
-
-        $this->io->section('Extract data');
         $extractor = new Extractor($config, $cache);
-        $extractor->extractData($this->io->createProgressBar($extractor->extractDataCount()));
-        $this->io->writeln('');
 
-        $this->io->section('Update documents');
-        //TODO:
+        $this->io->section('Start update');
+        $this->io->progressStart($extractor->extractDataCount());
+        foreach ($extractor->extractData() as $data) {
+            $this->io->progressAdvance();
+        }
+        $this->io->progressFinish();
+        $this->io->writeln('');
 
         return self::EXECUTE_SUCCESS;
     }
@@ -133,7 +134,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->coreApi->authenticate($username, $password);
     }
 
-    protected function loadConfig(): Config
+    protected function loadConfig(): ConfigManager
     {
         if (!\file_exists($this->jsonPath)) {
             throw new \RuntimeException(\sprintf('Config file %s not found', $this->jsonPath));
@@ -143,6 +144,6 @@ class EmsMigrationCommand extends AbstractCommand
             throw new \RuntimeException('Unexpected false config file');
         }
 
-        return Config::deserialize($contents);
+        return ConfigManager::deserialize($contents);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Config;
 
-use App\Cache\Cache;
+use App\Cache\CacheManager;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
 use EMS\CommonBundle\Storage\StorageManager;
@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-class Config
+class ConfigManager
 {
     /** @var Document[] */
     private array $documents;
@@ -34,7 +34,7 @@ class Config
     /** @var string[] */
     private $linkToClean = [];
     private StorageManager $storageManager;
-    private Cache $cache;
+    private CacheManager $cache;
     private CoreApi $coreApi;
     private LoggerInterface $logger;
 
@@ -43,9 +43,9 @@ class Config
         return self::getSerializer()->serialize($this, $format);
     }
 
-    public static function deserialize(string $data, string $format = JsonEncoder::FORMAT): Config
+    public static function deserialize(string $data, string $format = JsonEncoder::FORMAT): ConfigManager
     {
-        return self::getSerializer()->deserialize($data, Config::class, $format);
+        return self::getSerializer()->deserialize($data, ConfigManager::class, $format);
     }
 
     private static function getSerializer(): Serializer
@@ -175,7 +175,7 @@ class Config
         $this->storageManager = $storageManager;
     }
 
-    public function specifyCacheManager(Cache $cache): void
+    public function specifyCacheManager(CacheManager $cache): void
     {
         $this->cache = $cache;
     }

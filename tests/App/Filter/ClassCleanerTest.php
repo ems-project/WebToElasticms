@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Filter\Html;
 
-use App\Config\Config;
+use App\Config\ConfigManager;
 use App\Filter\Html\ClassCleaner;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -13,7 +13,7 @@ class ClassCleanerTest extends TestCase
 {
     public function testClassCleaner(): void
     {
-        $config = $this->createMock(Config::class);
+        $config = $this->createMock(ConfigManager::class);
         $config->method('getValidClasses')
             ->willReturn(['to-keep', 'top']);
 
@@ -28,7 +28,7 @@ class ClassCleanerTest extends TestCase
 
     public function testClassCleanerNested(): void
     {
-        $config = $this->createMock(Config::class);
+        $config = $this->createMock(ConfigManager::class);
         $config->method('getValidClasses')
             ->willReturn(['to-keep', 'top']);
 

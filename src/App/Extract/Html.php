@@ -6,7 +6,7 @@ namespace App\Extract;
 
 use App\Cache\HttpResult;
 use App\Config\Analyzer;
-use App\Config\Config;
+use App\Config\ConfigManager;
 use App\Config\WebResource;
 use App\Filter\Html\ClassCleaner;
 use App\Filter\Html\InternalLink;
@@ -18,9 +18,9 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class Html
 {
     public const TYPE = 'html';
-    private Config $config;
+    private ConfigManager $config;
 
-    public function __construct(Config $config)
+    public function __construct(ConfigManager $config)
     {
         $this->config = $config;
     }

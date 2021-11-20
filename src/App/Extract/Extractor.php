@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Extract;
 
-use App\Cache\Cache;
-use App\Config\Config;
+use App\Cache\CacheManager;
+use App\Config\ConfigManager;
 use App\Config\WebResource;
-use Symfony\Component\Console\Helper\ProgressBar;
 
 class Extractor
 {
-    private Config $config;
-    private Cache $cache;
+    private ConfigManager $config;
+    private CacheManager $cache;
 
-    public function __construct(Config $config, Cache $cache)
+    public function __construct(ConfigManager $config, CacheManager $cache)
     {
         $this->config = $config;
         $this->cache = $cache;
@@ -25,17 +24,18 @@ class Extractor
         return \count($this->config->getDocuments());
     }
 
-    public function extractData(ProgressBar $createProgressBar): void
+    /**
+     * @return iterable<mixed[]>
+     */
+    public function extractData(): iterable
     {
         foreach ($this->config->getDocuments() as $document) {
             $data = [];
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
             }
-            \dd($data);
-            $createProgressBar->advance();
+            yield $data;
         }
-        $createProgressBar->finish();
     }
 
     /**

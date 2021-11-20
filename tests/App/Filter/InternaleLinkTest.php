@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Filter\Html;
 
-use App\Config\Config;
+use App\Config\ConfigManager;
 use App\Filter\Html\InternalLink;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -13,7 +13,7 @@ class InternaleLinkTest extends TestCase
 {
     public function testInternalLink(): void
     {
-        $config = $this->createMock(Config::class);
+        $config = $this->createMock(ConfigManager::class);
         $config->method('getHosts')
             ->willReturn(['demo.com']);
         $config->method('findInternalLink')
@@ -43,7 +43,7 @@ class InternaleLinkTest extends TestCase
 
     public function testLinkToClean(): void
     {
-        $config = $this->createMock(Config::class);
+        $config = $this->createMock(ConfigManager::class);
         $config->method('getHosts')
             ->willReturn(['demo.com']);
         $config->method('findInternalLink')
