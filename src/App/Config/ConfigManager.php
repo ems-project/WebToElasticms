@@ -273,9 +273,9 @@ class ConfigManager
         });
 
         $this->expressionLanguage->register('json_escape', function ($str) {
-            return \sprintf('(\\EMS\\CommonBundle\\Common\\Standard\\Json::escape(%1$s))', $str);
+            return \sprintf('(null === %1$s ? null : \\EMS\\CommonBundle\\Common\\Standard\\Json::escape(%1$s))', $str);
         }, function ($arguments, $str) {
-            return \EMS\CommonBundle\Common\Standard\Json::escape($str);
+            return null === $str ? null : \EMS\CommonBundle\Common\Standard\Json::escape($str);
         });
 
         return $this->expressionLanguage;
