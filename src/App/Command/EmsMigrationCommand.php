@@ -108,13 +108,9 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->title('Starting updating elasticms');
 
         $this->io->section('Load config');
-        $config = $this->loadConfig();
-        $cache = new CacheManager($this->cacheFolder);
-        $config->specifyStorageManager($this->storageManager);
-        $config->specifyCacheManager($cache);
-        $config->specifyCoreClientManager($this->coreApi);
-        $config->specifyLogger($this->logger);
-        $extractor = new Extractor($config, $cache);
+        $cacheManager = new CacheManager($this->cacheFolder);
+        $configManager = $this->loadConfigManager($cacheManager);
+        $extractor = new Extractor($configManager, $cacheManager);
 
         $this->io->section('Start update');
         $this->io->progressStart($extractor->extractDataCount());
@@ -134,7 +130,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->coreApi->authenticate($username, $password);
     }
 
-    protected function loadConfig(): ConfigManager
+    protected function loadConfigManager(CacheManager $cacheManager): ConfigManager
     {
         if (!\file_exists($this->jsonPath)) {
             throw new \RuntimeException(\sprintf('Config file %s not found', $this->jsonPath));
@@ -144,6 +140,6 @@ class EmsMigrationCommand extends AbstractCommand
             throw new \RuntimeException('Unexpected false config file');
         }
 
-        return ConfigManager::deserialize($contents);
+        return ConfigManager::deserialize($contents, $cacheManager, $this->coreApi, $this->logger);
     }
 }

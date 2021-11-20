@@ -7,7 +7,6 @@ namespace App\Config;
 use App\Cache\CacheManager;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
-use EMS\CommonBundle\Storage\StorageManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -33,8 +32,7 @@ class ConfigManager
     private $validClasses = [];
     /** @var string[] */
     private $linkToClean = [];
-    private StorageManager $storageManager;
-    private CacheManager $cache;
+    private CacheManager $cacheManager;
     private CoreApi $coreApi;
     private LoggerInterface $logger;
 
@@ -43,9 +41,14 @@ class ConfigManager
         return self::getSerializer()->serialize($this, $format);
     }
 
-    public static function deserialize(string $data, string $format = JsonEncoder::FORMAT): ConfigManager
+    public static function deserialize(string $data, CacheManager $cache, CoreApi $coreApi, LoggerInterface $logger, string $format = JsonEncoder::FORMAT): ConfigManager
     {
-        return self::getSerializer()->deserialize($data, ConfigManager::class, $format);
+        $config = self::getSerializer()->deserialize($data, ConfigManager::class, $format);
+        $config->cacheManager = $cache;
+        $config->coreApi = $coreApi;
+        $config->logger = $logger;
+
+        return $config;
     }
 
     private static function getSerializer(): Serializer
@@ -170,21 +173,6 @@ class ConfigManager
         $this->validClasses = $validClasses;
     }
 
-    public function specifyStorageManager(StorageManager $storageManager): void
-    {
-        $this->storageManager = $storageManager;
-    }
-
-    public function specifyCacheManager(CacheManager $cache): void
-    {
-        $this->cache = $cache;
-    }
-
-    public function specifyCoreClientManager(CoreApi $coreApi): void
-    {
-        $this->coreApi = $coreApi;
-    }
-
     private function findInDocuments(Url $url): ?string
     {
         foreach ($this->documents as $document) {
@@ -205,7 +193,7 @@ class ConfigManager
 
     private function downloadAsset(Url $url): ?string
     {
-        $asset = $this->cache->get($url->getUrl());
+        $asset = $this->cacheManager->get($url->getUrl());
         $mimeType = $asset->getMimetype();
         if (false !== \strpos($mimeType, 'text/html')) {
             return null;
@@ -214,11 +202,6 @@ class ConfigManager
         $hash = $this->coreApi->file()->uploadStream($asset->getStream(), $filename, $mimeType);
 
         return \sprintf('ems://asset:%s?name=%s&type=%s', $hash, \urlencode($filename), \urlencode($mimeType));
-    }
-
-    public function specifyLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
     }
 
     /**
