@@ -112,7 +112,7 @@ class EmsMigrationCommand extends AbstractCommand
         $cacheManager = new CacheManager($this->cacheFolder);
         $configManager = $this->loadConfigManager($cacheManager);
         $extractor = new Extractor($configManager, $cacheManager);
-        $updateManager = new UpdateManager($this->coreApi, $configManager);
+        $updateManager = new UpdateManager($this->coreApi, $configManager, $this->logger);
 
         $this->io->section('Start update');
         $this->io->progressStart($extractor->extractDataCount());
