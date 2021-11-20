@@ -10,8 +10,6 @@ class Analyzer
     private string $type;
     /** @var Extractor[] */
     private array $extractors;
-    /** @var Computer[] */
-    private array $computers = [];
     /** @var array<mixed> */
     private array $defaultData;
 
@@ -65,21 +63,5 @@ class Analyzer
     public function setDefaultData(array $defaultData): void
     {
         $this->defaultData = $defaultData;
-    }
-
-    /**
-     * @return Computer[]
-     */
-    public function getComputers(): array
-    {
-        return $this->computers;
-    }
-
-    /**
-     * @param Computer[] $computers
-     */
-    public function setComputers(array $computers): void
-    {
-        $this->computers = $computers;
     }
 }

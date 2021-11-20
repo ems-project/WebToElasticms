@@ -5,18 +5,25 @@ declare(strict_types=1);
 namespace App\Extract;
 
 use App\Cache\CacheManager;
+use App\Config\Computer;
 use App\Config\ConfigManager;
 use App\Config\WebResource;
+use EMS\CommonBundle\Common\Standard\Json;
+use EMS\CommonBundle\Elasticsearch\Document\Document;
+use Symfony\Component\DependencyInjection\ExpressionLanguage;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Extractor
 {
     private ConfigManager $config;
     private CacheManager $cache;
+    private ExpressionLanguage $expressionLanguage;
 
     public function __construct(ConfigManager $config, CacheManager $cache)
     {
         $this->config = $config;
         $this->cache = $cache;
+        $this->expressionLanguage = $config->getExpressionLanguage();
     }
 
     public function extractDataCount(): int
@@ -34,6 +41,13 @@ class Extractor
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
             }
+
+            $type = $this->config->getType($document->getType());
+            foreach ($type->getComputers() as $computer) {
+                $value = $this->compute($computer, $data);
+                $this->assignComputedProperty($computer, $data, $value);
+            }
+
             yield new ExtractedData($document, $data);
         }
     }
@@ -52,6 +66,37 @@ class Extractor
             default:
                 throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
         }
-        $extractor->buildData($resource, $result, $analyzer, $data);
+        $extractor->extractData($resource, $result, $analyzer, $data);
+    }
+
+    /**
+     * @param array<mixed> $data
+     *
+     * @return mixed
+     */
+    private function compute(Computer $computer, array &$data)
+    {
+        $value = $this->expressionLanguage->evaluate($computer->getExpression(), $data);
+
+        if ($computer->isJsonDecode() && \is_string($value)) {
+            if ('null' === \trim($value)) {
+                return null;
+            }
+
+            return Json::decode($value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<mixed>             $data
+     * @param string|array<mixed>|null $value
+     */
+    private function assignComputedProperty(Computer $computer, array &$data, $value): void
+    {
+        $property = Document::fieldPathToPropertyPath($computer->getProperty());
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $propertyAccessor->setValue($data, $property, $value);
     }
 }

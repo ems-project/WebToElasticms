@@ -8,6 +8,7 @@ use App\Cache\CacheManager;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ExpressionLanguage;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -39,6 +40,7 @@ class ConfigManager
     private CacheManager $cacheManager;
     private CoreApi $coreApi;
     private LoggerInterface $logger;
+    private ?ExpressionLanguage $expressionLanguage = null;
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -254,5 +256,15 @@ class ConfigManager
     public function save(string $jsonPath): bool
     {
         return false !== \file_put_contents($jsonPath, $this->serialize());
+    }
+
+    public function getExpressionLanguage(): ExpressionLanguage
+    {
+        if (null !== $this->expressionLanguage) {
+            return $this->expressionLanguage;
+        }
+        $this->expressionLanguage = new ExpressionLanguage();
+
+        return $this->expressionLanguage;
     }
 }
