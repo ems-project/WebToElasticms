@@ -6,6 +6,7 @@ class Computer
 {
     private string $property;
     private string $template;
+    private string $expression;
     private bool $jsonDecode = false;
     private bool $jsonEscape = false;
 
@@ -27,6 +28,16 @@ class Computer
     public function setTemplate(string $template): void
     {
         $this->template = $template;
+    }
+
+    public function getExpression(): string
+    {
+        return $this->expression;
+    }
+
+    public function setExpression(string $expression): void
+    {
+        $this->expression = $expression;
     }
 
     public function isJsonDecode(): bool
