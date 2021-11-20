@@ -38,12 +38,11 @@ class Extractor
     public function extractData(): iterable
     {
         foreach ($this->config->getDocuments() as $document) {
-            $hash = \hash_init('sha1');
             $data = [];
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
-                $this->hashUpdate($hash, $resource);
             }
+            $hash = \sha1(Json::encode($data));
 
             $type = $this->config->getType($document->getType());
             foreach ($type->getComputers() as $computer) {
@@ -60,7 +59,7 @@ class Extractor
                 }
             }
 
-            $data[$this->config->getHashResourcesField()] = \hash_final($hash);
+            $data[$this->config->getHashResourcesField()] = $hash;
 
             yield new ExtractedData($document, $data);
         }
@@ -129,13 +128,5 @@ class Extractor
         $property = Document::fieldPathToPropertyPath($computer->getProperty());
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $propertyAccessor->setValue($data, $property, $value);
-    }
-
-    private function hashUpdate(\HashContext $hash, WebResource $resource): void
-    {
-        $stream = $this->cache->get($resource->getUrl())->getStream();
-        while (!$stream->eof()) {
-            \hash_update($hash, $stream->read(819200));
-        }
     }
 }
