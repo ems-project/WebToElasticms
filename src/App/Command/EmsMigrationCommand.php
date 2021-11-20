@@ -123,6 +123,9 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->progressFinish();
         $this->io->writeln('');
 
+        $this->io->section('Save config');
+        $configManager->save($this->jsonPath);
+
         return self::EXECUTE_SUCCESS;
     }
 

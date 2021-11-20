@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
@@ -65,7 +66,7 @@ class ConfigManager
             new ObjectNormalizer(null, null, null, $propertyTypeExtractor),
         ], [
             new XmlEncoder(),
-            new JsonEncoder(),
+            new JsonEncoder(new JsonEncode([JsonEncode::OPTIONS => JSON_PRETTY_PRINT]), null),
         ]);
     }
 
@@ -248,5 +249,10 @@ class ConfigManager
         }
 
         throw new \RuntimeException(\sprintf('Type %s not found', $name));
+    }
+
+    public function save(string $jsonPath): bool
+    {
+        return false !== \file_put_contents($jsonPath, $this->serialize());
     }
 }

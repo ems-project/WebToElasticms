@@ -37,9 +37,6 @@ class Document
         $this->type = $type;
     }
 
-    /**
-     * @return string
-     */
     public function getOuuid(): ?string
     {
         return $this->ouuid;
