@@ -10,6 +10,8 @@ class Analyzer
     private string $type;
     /** @var Extractor[] */
     private array $extractors;
+    /** @var array<mixed> */
+    private array $defaultData;
 
     public function getName(): string
     {
@@ -45,5 +47,21 @@ class Analyzer
     public function setExtractors(array $extractors): void
     {
         $this->extractors = $extractors;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function getDefaultData(): array
+    {
+        return $this->defaultData;
+    }
+
+    /**
+     * @param mixed[] $defaultData
+     */
+    public function setDefaultData(array $defaultData): void
+    {
+        $this->defaultData = $defaultData;
     }
 }

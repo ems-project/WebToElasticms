@@ -25,6 +25,9 @@ class ConfigManager
     /** @var Analyzer[] */
     private array $analyzers;
 
+    /** @var Type[] */
+    private array $types;
+
     /** @var string[] */
     private array $hosts = [];
 
@@ -218,5 +221,32 @@ class ConfigManager
     public function setLinkToClean(array $linkToClean): void
     {
         $this->linkToClean = $linkToClean;
+    }
+
+    /**
+     * @return Type[]
+     */
+    public function getTypes(): array
+    {
+        return $this->types;
+    }
+
+    /**
+     * @param Type[] $types
+     */
+    public function setTypes(array $types): void
+    {
+        $this->types = $types;
+    }
+
+    public function getType(string $name): Type
+    {
+        foreach ($this->types as $type) {
+            if ($type->getName() === $name) {
+                return $type;
+            }
+        }
+
+        throw new \RuntimeException(\sprintf('Type %s not found', $name));
     }
 }
