@@ -286,13 +286,8 @@ class ConfigManager
         return $this->hashResourcesField;
     }
 
-    /**
-     * @param string $hashResourcesField
-     */
     public function setHashResourcesField(string $hashResourcesField): void
     {
         $this->hashResourcesField = $hashResourcesField;
     }
-
-
 }

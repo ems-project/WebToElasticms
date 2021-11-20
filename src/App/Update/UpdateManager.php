@@ -39,6 +39,10 @@ class UpdateManager
             }
             $extractedData->getDocument()->setOuuid($ouuid);
         } else {
+            $hash = $data[$this->configManager->getHashResourcesField()];
+            if (null !== $hash && $hash === $typeManager->get($ouuid)->getRawData()[$this->configManager->getHashResourcesField()] ?? null) {
+                return;
+            }
             $typeManager->save($ouuid, $data);
         }
     }
