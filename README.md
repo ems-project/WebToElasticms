@@ -91,3 +91,7 @@ Those parameters are using the [Symfony expression syntax](https://symfony.com/d
 Functions available: 
  - `uuid()`: generate a unique identifier
  - `json_escape(str)`: JSON escape a string 
+
+Variable available
+ - `data` an instance of [ExpressionData](src/App/Helper/ExpressionData.php)
+

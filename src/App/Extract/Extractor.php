@@ -8,6 +8,7 @@ use App\Cache\CacheManager;
 use App\Config\Computer;
 use App\Config\ConfigManager;
 use App\Config\WebResource;
+use App\Helper\ExpressionData;
 use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\Document;
 use Symfony\Component\DependencyInjection\ExpressionLanguage;
@@ -86,7 +87,9 @@ class Extractor
      */
     private function compute(Computer $computer, array &$data)
     {
-        $value = $this->expressionLanguage->evaluate($computer->getExpression(), $data);
+        $value = $this->expressionLanguage->evaluate($computer->getExpression(), [
+            'data' => new ExpressionData($data),
+        ]);
 
         if ($computer->isJsonDecode() && \is_string($value)) {
             if ('null' === \trim($value)) {
