@@ -52,6 +52,6 @@ class Extractor
             default:
                 throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
         }
-        $extractor->extract($resource, $result, $analyzer, $data);
+        $extractor->buildData($resource, $result, $analyzer, $data);
     }
 }
