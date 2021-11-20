@@ -31,6 +31,7 @@ class EmsMigrationCommand extends AbstractCommand
     private const ARG_USERNAME = 'username';
     private const ARG_PASSWORD = 'password';
     public const OPTION_CACHE_FOLDER = 'cache-folder';
+    public const OPTION_FORCE = 'force';
     protected static $defaultName = 'ems:migrate';
     private ConsoleLogger $logger;
     private CoreApi $coreApi;
@@ -40,6 +41,7 @@ class EmsMigrationCommand extends AbstractCommand
     private string $username;
     private StorageManager $storageManager;
     private string $cacheFolder;
+    private bool $force;
 
     protected function configure(): void
     {
@@ -64,6 +66,7 @@ class EmsMigrationCommand extends AbstractCommand
             )
             ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
+            ->addOption(self::OPTION_FORCE, null, InputOption::VALUE_NONE, 'force update all documents')
             ->addOption(self::OPTION_CACHE_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where cache will stored', \implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'WebToElasticms']));
     }
 
@@ -73,6 +76,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->logger = new ConsoleLogger($output);
         $elasticmsUrl = $this->getArgumentString(self::ARG_ELASTICMS_URL);
         $this->jsonPath = $this->getArgumentString(self::ARG_CONFIG_FILE_PATH);
+        $this->force = $this->getOptionBool(self::OPTION_FORCE);
         $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
         $hash = $this->getOptionString(self::ARG_HASH_ALGO);
         $client = new Client($elasticmsUrl, $this->logger);
@@ -117,7 +121,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->section('Start update');
         $this->io->progressStart($extractor->extractDataCount());
         foreach ($extractor->extractData() as $extractedData) {
-            $updateManager->update($extractedData);
+            $updateManager->update($extractedData, $this->force);
             $this->io->progressAdvance();
         }
         $this->io->progressFinish();

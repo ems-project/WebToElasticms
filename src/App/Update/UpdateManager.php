@@ -23,7 +23,7 @@ class UpdateManager
         $this->logger = $logger;
     }
 
-    public function update(ExtractedData $extractedData): void
+    public function update(ExtractedData $extractedData, bool $force): void
     {
         $ouuid = $extractedData->getDocument()->getOuuid();
         $data = $extractedData->getData();
@@ -40,7 +40,7 @@ class UpdateManager
             $extractedData->getDocument()->setOuuid($ouuid);
         } else {
             $hash = $data[$this->configManager->getHashResourcesField()];
-            if (null !== $hash && $hash === $typeManager->get($ouuid)->getRawData()[$this->configManager->getHashResourcesField()] ?? null) {
+            if (!$force && null !== $hash && $hash === $typeManager->get($ouuid)->getRawData()[$this->configManager->getHashResourcesField()] ?? null) {
                 return;
             }
             $typeManager->save($ouuid, $data);
