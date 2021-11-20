@@ -189,7 +189,7 @@ class ConfigManager
             foreach ($document->getResources() as $resource) {
                 $resourceUrl = new Url($resource->getUrl());
                 if ($resourceUrl->getPath() === $url->getPath()) {
-                    return \implode(':', [$document->getType(), $ouuid]);
+                    return \sprintf('ems://object:%s:%s', $document->getType(), $ouuid);
                 }
             }
         }
