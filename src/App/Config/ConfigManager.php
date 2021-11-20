@@ -41,6 +41,7 @@ class ConfigManager
     private CoreApi $coreApi;
     private LoggerInterface $logger;
     private ?ExpressionLanguage $expressionLanguage = null;
+    private string $hashResourcesField = 'import_hash_resources';
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -279,4 +280,19 @@ class ConfigManager
 
         return $this->expressionLanguage;
     }
+
+    public function getHashResourcesField(): string
+    {
+        return $this->hashResourcesField;
+    }
+
+    /**
+     * @param string $hashResourcesField
+     */
+    public function setHashResourcesField(string $hashResourcesField): void
+    {
+        $this->hashResourcesField = $hashResourcesField;
+    }
+
+
 }
