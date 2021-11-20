@@ -11,6 +11,8 @@ class Type
     private string $name;
     /** @var Computer[] */
     private array $computers = [];
+    /** @var string[] */
+    private $tempFields = [];
 
     /**
      * @return mixed[]
@@ -53,4 +55,22 @@ class Type
     {
         $this->computers = $computers;
     }
+
+    /**
+     * @return string[]
+     */
+    public function getTempFields(): array
+    {
+        return $this->tempFields;
+    }
+
+    /**
+     * @param string[] $tempFields
+     */
+    public function setTempFields(array $tempFields): void
+    {
+        $this->tempFields = $tempFields;
+    }
+
+
 }

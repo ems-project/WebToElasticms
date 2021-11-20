@@ -78,6 +78,10 @@ This filter extract the text and remove all the rest
 
 ## Types
 
+### tempFields
+
+Array of string used to remove field from the data in order to not sent them to elasticms. It may append that you used temporary fields in order to save extractor values and used those values in computers. 
+
 ### Computer
 
 #### Expression

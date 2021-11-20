@@ -48,6 +48,12 @@ class Extractor
                 $this->assignComputedProperty($computer, $data, $value);
             }
 
+            foreach ($type->getTempFields() as $tempFields) {
+                if (isset($data[$tempFields])) {
+                    unset($data[$tempFields]);
+                }
+            }
+
             yield new ExtractedData($document, $data);
         }
     }
