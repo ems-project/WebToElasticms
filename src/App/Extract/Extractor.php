@@ -25,7 +25,7 @@ class Extractor
     }
 
     /**
-     * @return iterable<mixed[]>
+     * @return iterable<ExtractedData>
      */
     public function extractData(): iterable
     {
@@ -34,7 +34,7 @@ class Extractor
             foreach ($document->getResources() as $resource) {
                 $this->extractDataFromResource($resource, $data);
             }
-            yield $data;
+            yield new ExtractedData($document, $data);
         }
     }
 
