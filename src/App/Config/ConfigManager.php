@@ -189,7 +189,7 @@ class ConfigManager
             foreach ($document->getResources() as $resource) {
                 $resourceUrl = new Url($resource->getUrl());
                 if ($resourceUrl->getPath() === $url->getPath()) {
-                    return \implode(':', [$document->getType(), $document->getOuuid()]);
+                    return \implode(':', [$document->getType(), $ouuid]);
                 }
             }
         }
