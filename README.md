@@ -95,3 +95,16 @@ Functions available:
 Variable available
  - `data` an instance of [ExpressionData](src/App/Helper/ExpressionData.php)
 
+## Docker
+
+### Build 
+
+```
+docker build -t docker.io/elasticms/web2ems:latest .
+```
+
+### Running
+
+```
+docker run --rm -v <LOCAL_FILE_PATH>:<CONTAINER_FILE_PATH> docker.io/elasticms/web2ems:latest -f application.php <URL> <CONTAINER_FILE_PATH>
+```
