@@ -50,6 +50,10 @@ class ConfigManager
     private array $urlsNotFound = [];
     /** @var string[] */
     private array $linksByUrl = [];
+    /**
+     * @var array<string, string[]>
+     */
+    private array $documentsToClean = [];
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -380,4 +384,21 @@ class ConfigManager
     {
         $this->linksByUrl = $linksByUrl;
     }
+
+    /**
+     * @var array<string, string[]>
+     */
+    public function getDocumentsToClean(): array
+    {
+        return $this->documentsToClean;
+    }
+
+    /**
+     * @param \string[][] $documentsToClean
+     */
+    public function setDocumentsToClean(array $documentsToClean): void
+    {
+        $this->documentsToClean = $documentsToClean;
+    }
+
 }

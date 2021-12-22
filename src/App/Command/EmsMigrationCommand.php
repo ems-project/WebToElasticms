@@ -123,6 +123,22 @@ class EmsMigrationCommand extends AbstractCommand
         $extractor = new Extractor($configManager, $cacheManager, $this->logger);
         $updateManager = new UpdateManager($this->coreApi, $configManager, $this->logger);
 
+        $this->io->section('Start cleaning');
+        foreach ($configManager->getDocumentsToClean() as $contentType => $documents) {
+            $contentTypeApi = $this->coreApi->data($contentType);
+            $this->io->progressStart(\count($documents));
+            foreach ($documents as $document) {
+                if (!$contentTypeApi->head($document)) {
+                    $this->io->progressAdvance();
+                    continue;
+                }
+                $contentTypeApi->delete($document);
+                $this->io->progressAdvance();
+            }
+            $this->io->progressFinish();
+
+        }
+
         $this->io->section('Start updates');
         $this->io->progressStart($extractor->extractDataCount());
         foreach ($extractor->extractData() as $extractedData) {

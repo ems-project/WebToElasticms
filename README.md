@@ -50,7 +50,19 @@ The JSON config file list all web resources to synchronise for each document.
     }
   ],
   "validClasses": ["toc"],
-  "linkToClean": ["/^\\/fr\\/glossaire/"]
+  "linkToClean": ["/^\\/fr\\/glossaire/"],
+  "urlsNotFound": [
+    "\/fr\/page-not-found"
+  ],
+  "linksByUrl": {
+    "\/": "ems:\/\/object:page:xaO1YHoBFgLgfwq-PbIl"
+  },
+  "documentsToClean": {
+    "page": [
+      "w9WS4X0BFgLgfwq-9hDd",
+      "y9YG4X0BeD9wLAROUfIV"
+    ]
+  }
 }
 ```
 
@@ -91,6 +103,8 @@ Those parameters are using the [Symfony expression syntax](https://symfony.com/d
 Functions available: 
  - `uuid()`: generate a unique identifier
  - `json_escape(str)`: JSON escape a string 
+ - `date(format, timestamp)`: Format a date 
+ - `strtotime(str)`: Convert a string into a date 
 
 Variable available
  - `data` an instance of [ExpressionData](src/App/Helper/ExpressionData.php)
