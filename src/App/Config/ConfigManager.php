@@ -46,6 +46,10 @@ class ConfigManager
     private string $hashResourcesField = 'import_hash_resources';
     private ?string $autoDiscoverResourcesLink = null;
     private ?string $ignoreResourceLinkPattern = null;
+    /** @var string[] */
+    private array $urlsNotFound = [];
+    /** @var string[] */
+    private array $linksByUrl = [];
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -58,6 +62,7 @@ class ConfigManager
         $config->cacheManager = $cache;
         $config->coreApi = $coreApi;
         $config->logger = $logger;
+        $config->urlsNotFound = [];
 
         return $config;
     }
@@ -149,6 +154,14 @@ class ConfigManager
 
     public function findInternalLink(Url $url): string
     {
+        if (isset($this->linksByUrl[$url->getPath()])) {
+            return $this->linksByUrl[$url->getPath()];
+        }
+
+        if (\in_array($url->getPath(), $this->urlsNotFound)) {
+            return $url->getPath();
+        }
+
         $path = $this->findInDocuments($url);
         if (null === $path && null === $url->getFragment() && null === $url->getQuery()) {
             $path = $this->downloadAsset($url);
@@ -156,6 +169,7 @@ class ConfigManager
         if (null === $path) {
             $path = $url->getPath();
             $this->logger->warning(\sprintf('It was not possible to convert the path %s', $path));
+            $this->urlsNotFound[] = $url->getPath();
         }
 
         if (null !== $url->getFragment()) {
@@ -282,6 +296,18 @@ class ConfigManager
             return null === $str ? null : \EMS\CommonBundle\Common\Standard\Json::escape($str);
         });
 
+        $this->expressionLanguage->register('strtotime', function ($str) {
+            return \sprintf('(null === %1$s ? null : \\strtotime(%1$s))', $str);
+        }, function ($arguments, $str) {
+            return null === $str ? null : \strtotime($str);
+        });
+
+        $this->expressionLanguage->register('date', function ($format, $timestamp) {
+            return \sprintf('((null === %1$s || null === %2$s) ? null : \\date(%1$s, %2$s))', $format, $timestamp);
+        }, function ($arguments, $format, $timestamp) {
+            return (null === $format || null === $timestamp) ? null : \date($format, $timestamp);
+        });
+
         return $this->expressionLanguage;
     }
 
@@ -329,5 +355,29 @@ class ConfigManager
     public function setIgnoreResourceLinkPattern(?string $ignoreResourceLinkPattern): void
     {
         $this->ignoreResourceLinkPattern = $ignoreResourceLinkPattern;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getUrlsNotFound(): array
+    {
+        return $this->urlsNotFound;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLinksByUrl(): array
+    {
+        return $this->linksByUrl;
+    }
+
+    /**
+     * @param string[] $linksByUrl
+     */
+    public function setLinksByUrl(array $linksByUrl): void
+    {
+        $this->linksByUrl = $linksByUrl;
     }
 }

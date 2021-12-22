@@ -105,7 +105,12 @@ class EmsMigrationCommand extends AbstractCommand
         });
 
         $this->coreApi->setToken($token);
-        $this->username = $this->coreApi->user()->getProfileAuthenticated()->getUsername();
+        try {
+            $this->username = $this->coreApi->user()->getProfileAuthenticated()->getUsername();
+        } catch (\Throwable $e) {
+            $this->cache->delete('my_auth_key');
+            throw $e;
+        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
