@@ -46,4 +46,20 @@ class Document
     {
         $this->ouuid = $ouuid;
     }
+
+    public function hasResourceFor(string $locale): bool
+    {
+        foreach ($this->resources as $resource) {
+            if ($resource->getLocale() === $locale) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function addResource(WebResource $param): void
+    {
+        $this->resources[] = $param;
+    }
 }

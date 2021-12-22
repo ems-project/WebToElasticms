@@ -36,12 +36,16 @@ class ConfigManager
     /** @var string[] */
     private $validClasses = [];
     /** @var string[] */
+    private $locales = [];
+    /** @var string[] */
     private $linkToClean = [];
     private CacheManager $cacheManager;
     private CoreApi $coreApi;
     private LoggerInterface $logger;
     private ?ExpressionLanguage $expressionLanguage = null;
     private string $hashResourcesField = 'import_hash_resources';
+    private ?string $autoDiscoverResourcesLink = null;
+    private ?string $ignoreResourceLinkPattern = null;
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -289,5 +293,41 @@ class ConfigManager
     public function setHashResourcesField(string $hashResourcesField): void
     {
         $this->hashResourcesField = $hashResourcesField;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLocales(): array
+    {
+        return $this->locales;
+    }
+
+    /**
+     * @param string[] $locales
+     */
+    public function setLocales(array $locales): void
+    {
+        $this->locales = $locales;
+    }
+
+    public function getAutoDiscoverResourcesLink(): ?string
+    {
+        return $this->autoDiscoverResourcesLink;
+    }
+
+    public function setAutoDiscoverResourcesLink(?string $autoDiscoverResourcesLink): void
+    {
+        $this->autoDiscoverResourcesLink = $autoDiscoverResourcesLink;
+    }
+
+    public function getIgnoreResourceLinkPattern(): ?string
+    {
+        return $this->ignoreResourceLinkPattern;
+    }
+
+    public function setIgnoreResourceLinkPattern(?string $ignoreResourceLinkPattern): void
+    {
+        $this->ignoreResourceLinkPattern = $ignoreResourceLinkPattern;
     }
 }

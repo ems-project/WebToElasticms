@@ -40,7 +40,7 @@ class Extractor
         foreach ($this->config->getDocuments() as $document) {
             $data = [];
             foreach ($document->getResources() as $resource) {
-                $this->extractDataFromResource($resource, $data);
+                $this->extractDataFromResource($document, $resource, $data);
             }
             $hash = \sha1(Json::encode($data));
 
@@ -68,13 +68,13 @@ class Extractor
     /**
      * @param array<mixed> $data
      */
-    private function extractDataFromResource(WebResource $resource, array &$data): void
+    private function extractDataFromResource(\App\Config\Document $document, WebResource $resource, array &$data): void
     {
         $result = $this->cache->get($resource->getUrl());
         $analyzer = $this->config->getAnalyzer($resource->getType());
         switch ($analyzer->getType()) {
             case Html::TYPE:
-                $extractor = new Html($this->config);
+                $extractor = new Html($this->config, $document);
                 break;
             default:
                 throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
