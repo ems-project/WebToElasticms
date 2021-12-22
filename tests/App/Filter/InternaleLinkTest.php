@@ -7,6 +7,7 @@ namespace App\Tests\Filter\Html;
 use App\Config\ConfigManager;
 use App\Filter\Html\InternalLink;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 class InternaleLinkTest extends TestCase
@@ -14,12 +15,13 @@ class InternaleLinkTest extends TestCase
     public function testInternalLink(): void
     {
         $config = $this->createMock(ConfigManager::class);
+        $logger = $this->createMock(LoggerInterface::class);
         $config->method('getHosts')
             ->willReturn(['demo.com']);
         $config->method('findInternalLink')
             ->willReturn('ems://object:page:ouuid');
 
-        $internalLink = new InternalLink($config, 'https://demo.com/a/b');
+        $internalLink = new InternalLink($logger, $config, 'https://demo.com/a/b');
 
         $crawler = new Crawler(
 '<div style="padding: inherit;"><a href="https://demo.com/toto/link">Url</a></div>
@@ -44,6 +46,7 @@ class InternaleLinkTest extends TestCase
     public function testLinkToClean(): void
     {
         $config = $this->createMock(ConfigManager::class);
+        $logger = $this->createMock(LoggerInterface::class);
         $config->method('getHosts')
             ->willReturn(['demo.com']);
         $config->method('findInternalLink')
@@ -55,7 +58,7 @@ class InternaleLinkTest extends TestCase
 <div style="padding: inherit;"><a href="../../fr/glossaire">link</a></div>
 <div style="padding: inherit;"><a href="/fr/glossaire">link</a></div>
 <div style="padding: inherit;"><a href="/autre">link</a> toto <a href="/fr/glossaire">link</a> totot</div>');
-        $internalLink = new InternalLink($config, 'https://demo.com/a/b');
+        $internalLink = new InternalLink($logger, $config, 'https://demo.com/a/b');
 
         $internalLink->process($crawler->filter('body'));
         $this->assertEquals('<div style="padding: inherit;">Url</div>

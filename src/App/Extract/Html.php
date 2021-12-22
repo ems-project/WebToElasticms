@@ -70,7 +70,7 @@ class Html
                     $asHtml = false;
                     break;
                 case InternalLink::TYPE:
-                    $filter = new InternalLink($this->config, $resource->getUrl());
+                    $filter = new InternalLink($this->logger, $this->config, $resource->getUrl());
                     break;
                 case StyleCleaner::TYPE:
                     $filter = new StyleCleaner($this->config);
