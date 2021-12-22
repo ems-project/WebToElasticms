@@ -11,6 +11,7 @@ use App\Config\WebResource;
 use App\Helper\ExpressionData;
 use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\Document;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ExpressionLanguage;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -19,11 +20,13 @@ class Extractor
     private ConfigManager $config;
     private CacheManager $cache;
     private ExpressionLanguage $expressionLanguage;
+    private LoggerInterface $logger;
 
-    public function __construct(ConfigManager $config, CacheManager $cache)
+    public function __construct(ConfigManager $config, CacheManager $cache, LoggerInterface $logger)
     {
         $this->config = $config;
         $this->cache = $cache;
+        $this->logger = $logger;
         $this->expressionLanguage = $config->getExpressionLanguage();
     }
 
@@ -74,7 +77,7 @@ class Extractor
         $analyzer = $this->config->getAnalyzer($resource->getType());
         switch ($analyzer->getType()) {
             case Html::TYPE:
-                $extractor = new Html($this->config, $document);
+                $extractor = new Html($this->config, $document, $this->logger);
                 break;
             default:
                 throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));

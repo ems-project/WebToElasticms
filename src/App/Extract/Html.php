@@ -14,6 +14,7 @@ use App\Filter\Html\InternalLink;
 use App\Filter\Html\Striptag;
 use App\Filter\Html\StyleCleaner;
 use App\Helper\Url;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -22,11 +23,13 @@ class Html
     public const TYPE = 'html';
     private ConfigManager $config;
     private Document $document;
+    private LoggerInterface $logger;
 
-    public function __construct(ConfigManager $config, Document $document)
+    public function __construct(ConfigManager $config, Document $document, LoggerInterface $logger)
     {
         $this->config = $config;
         $this->document = $document;
+        $this->logger = $logger;
     }
 
     /**
@@ -38,6 +41,10 @@ class Html
         $this->autoDiscoverResources($crawler, $resource);
         foreach ($analyzer->getExtractors() as $extractor) {
             $content = $crawler->filter($extractor->getSelector());
+            if (1 !== $content->count()) {
+                $this->logger->warning(\sprintf('The resource %s can be extracted has there is %d nodes found for the selector %s', $resource->getUrl(), $content->count(), $extractor->getSelector()));
+                continue;
+            }
             $html = $this->applyFilters($resource, $content, $extractor);
             $this->assignExtractedProperty($resource, $extractor, $data, $html);
         }
