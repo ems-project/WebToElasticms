@@ -11,6 +11,7 @@ use App\Config\WebResource;
 use App\Helper\ExpressionData;
 use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\Document;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ExpressionLanguage;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -43,8 +44,19 @@ class Extractor
         foreach ($this->config->getDocuments() as $document) {
             $data = [];
             foreach ($document->getResources() as $resource) {
-                $this->extractDataFromResource($document, $resource, $data);
+                try {
+                    $this->extractDataFromResource($document, $resource, $data);
+                } catch (ClientException $e) {
+                    $this->logger->error(\sprintf('Error getting url %s with error %s', $resource->getUrl(), $e->getMessage()));
+                } catch (RequestException $e) {
+                    $this->logger->error(\sprintf('Error getting url %s with error %s', $resource->getUrl(), $e->getMessage()));
+                }
             }
+            if (empty($data)) {
+                $this->logger->warning(\sprintf('Nothing has been extracted for this config %s', Json::encode($document)));
+                continue;
+            }
+
             $hash = \sha1(Json::encode($data));
 
             $type = $this->config->getType($document->getType());
