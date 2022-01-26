@@ -57,6 +57,4 @@ class Extractor
     {
         $this->attribute = $attribute;
     }
-
-
 }

@@ -136,7 +136,6 @@ class EmsMigrationCommand extends AbstractCommand
                 $this->io->progressAdvance();
             }
             $this->io->progressFinish();
-
         }
 
         $this->io->section('Start updates');
