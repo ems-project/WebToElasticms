@@ -7,6 +7,7 @@ namespace App\Config;
 use App\Cache\CacheManager;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
+use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ExpressionLanguage;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
@@ -220,17 +221,39 @@ class ConfigManager
         return null;
     }
 
-    private function downloadAsset(Url $url): ?string
+    /**
+     * @return array{filename: string, filesize: int|null, mimetype: string, sha1: string}|array{}
+     */
+    public function urlToAssetArray(Url $url): array
     {
         $asset = $this->cacheManager->get($url->getUrl());
         $mimeType = $asset->getMimetype();
         if (false !== \strpos($mimeType, 'text/html')) {
-            return null;
+            return [];
         }
         $filename = $url->getFilename();
         $hash = $this->coreApi->file()->uploadStream($asset->getStream(), $filename, $mimeType);
 
-        return \sprintf('ems://asset:%s?name=%s&type=%s', $hash, \urlencode($filename), \urlencode($mimeType));
+        if (null === $hash) {
+            throw new \RuntimeException('Unexpected null hash');
+        }
+
+        return [
+            EmsFields::CONTENT_FILE_HASH_FIELD => $hash,
+            EmsFields::CONTENT_FILE_NAME_FIELD => $filename,
+            EmsFields::CONTENT_MIME_TYPE_FIELD => $mimeType,
+            EmsFields::CONTENT_FILE_SIZE_FIELD => $asset->getStream()->getSize(),
+        ];
+    }
+
+    private function downloadAsset(Url $url): ?string
+    {
+        $assetArray = $this->urlToAssetArray($url);
+        if (empty($assetArray)) {
+            return null;
+        }
+
+        return \sprintf('ems://asset:%s?name=%s&type=%s', $assetArray[EmsFields::CONTENT_FILE_HASH_FIELD], \urlencode($assetArray[EmsFields::CONTENT_FILE_NAME_FIELD]), \urlencode($assetArray[EmsFields::CONTENT_MIME_TYPE_FIELD]));
     }
 
     /**
@@ -386,7 +409,7 @@ class ConfigManager
     }
 
     /**
-     * @var array<string, string[]>
+     * @return array<string, string[]>
      */
     public function getDocumentsToClean(): array
     {
@@ -394,11 +417,10 @@ class ConfigManager
     }
 
     /**
-     * @param \string[][] $documentsToClean
+     * @param array<string, string[]> $documentsToClean
      */
     public function setDocumentsToClean(array $documentsToClean): void
     {
         $this->documentsToClean = $documentsToClean;
     }
-
 }

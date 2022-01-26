@@ -9,6 +9,7 @@ use App\Config\Analyzer;
 use App\Config\ConfigManager;
 use App\Config\Document;
 use App\Config\WebResource;
+use App\Filter\Attr\Src;
 use App\Filter\Html\ClassCleaner;
 use App\Filter\Html\InternalLink;
 use App\Filter\Html\Striptag;
@@ -48,6 +49,9 @@ class Html
             $attribute = $extractor->getAttribute();
             if (null !== $attribute) {
                 $html = $content->attr($attribute);
+                if (null !== $html) {
+                    $html = $this->applyAttrFilters($resource, $html, $extractor);
+                }
             } else {
                 $html = $this->applyFilters($resource, $content, $extractor);
             }
@@ -57,12 +61,13 @@ class Html
 
     /**
      * @param array<mixed> $data
+     * @param mixed        $content
      */
-    protected function assignExtractedProperty(WebResource $resource, \App\Config\Extractor $extractor, array &$data, string $html): void
+    protected function assignExtractedProperty(WebResource $resource, \App\Config\Extractor $extractor, array &$data, $content): void
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $property = \str_replace(['%locale%'], [$resource->getLocale()], $extractor->getProperty());
-        $propertyAccessor->setValue($data, $property, $html);
+        $propertyAccessor->setValue($data, $property, $content);
     }
 
     private function applyFilters(WebResource $resource, Crawler $content, \App\Config\Extractor $extractor): string
@@ -90,6 +95,28 @@ class Html
         }
 
         return $asHtml ? $content->html() : $content->text();
+    }
+
+    /**
+     * @return mixed
+     */
+    private function applyAttrFilters(WebResource $resource, string $content, \App\Config\Extractor $extractor)
+    {
+        foreach ($extractor->getFilters() as $filterType) {
+            switch ($filterType) {
+                case Src::TYPE:
+                    if (!\is_string($content)) {
+                        throw new \RuntimeException(\sprintf('Unexpected non string content for filter %s', Src::TYPE));
+                    }
+                    $filter = new Src($this->logger, $this->config, $resource->getUrl());
+                    $content = $filter->process($content);
+                    break;
+                default:
+                    throw new \RuntimeException(\sprintf('Unexpected %s filter', $filterType));
+            }
+        }
+
+        return $content;
     }
 
     private function autoDiscoverResources(Crawler $crawler, WebResource $resource): void
