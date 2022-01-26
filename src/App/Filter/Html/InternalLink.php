@@ -38,6 +38,10 @@ class InternalLink
 
             $href = $item->getAttribute($attribute);
             $url = new Url($href, $this->currentUrl);
+
+            if (\in_array($url->getScheme(), ['mailto'])) {
+                continue;
+            }
             if (!\in_array($url->getHost(), $this->config->getHosts())) {
                 continue;
             }
