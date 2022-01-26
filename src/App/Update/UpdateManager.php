@@ -43,7 +43,11 @@ class UpdateManager
             if (!$force && null !== $hash && $hash === $typeManager->get($ouuid)->getRawData()[$this->configManager->getHashResourcesField()] ?? null) {
                 return;
             }
-            $typeManager->save($ouuid, $data);
+            try {
+                $typeManager->save($ouuid, $data);
+            } catch (\Throwable $e) {
+                $this->logger->error(\sprintf('Impossible to finalize the document %s with the error %s', $ouuid, $e->getMessage()));
+            }
         }
     }
 }
