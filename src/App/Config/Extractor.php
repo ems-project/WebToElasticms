@@ -7,6 +7,7 @@ namespace App\Config;
 class Extractor
 {
     private string $selector;
+    private ?string $attribute = null;
     private string $property;
     /** @var string[] */
     private array $filters = [];
@@ -46,4 +47,16 @@ class Extractor
     {
         $this->filters = $filters;
     }
+
+    public function getAttribute(): ?string
+    {
+        return $this->attribute;
+    }
+
+    public function setAttribute(?string $attribute): void
+    {
+        $this->attribute = $attribute;
+    }
+
+
 }

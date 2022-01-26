@@ -45,7 +45,12 @@ class Html
                 $this->logger->warning(\sprintf('The resource %s can be extracted has there is %d nodes found for the selector %s', $resource->getUrl(), $content->count(), $extractor->getSelector()));
                 continue;
             }
-            $html = $this->applyFilters($resource, $content, $extractor);
+            $attribute = $extractor->getAttribute();
+            if (null !== $attribute) {
+                $html = $content->attr($attribute);
+            } else {
+                $html = $this->applyFilters($resource, $content, $extractor);
+            }
             $this->assignExtractedProperty($resource, $extractor, $data, $html);
         }
     }
