@@ -10,6 +10,8 @@ class Document
     private array $resources;
     private string $type;
     private ?string $ouuid = null;
+    /** @var mixed[] */
+    private array $defaultData = [];
 
     /**
      * @return WebResource[]
@@ -37,8 +39,17 @@ class Document
         $this->type = $type;
     }
 
-    public function getOuuid(): ?string
+    public function getOuuid(): string
     {
+        if (null !== $this->ouuid) {
+            return $this->ouuid;
+        }
+        $resources = $this->getResources();
+        if (\count($resources) < 1) {
+            throw new \RuntimeException('Document without resource nor ouuid');
+        }
+        $this->ouuid = \sha1($resources[0]->getUrl());
+
         return $this->ouuid;
     }
 
@@ -61,5 +72,21 @@ class Document
     public function addResource(WebResource $param): void
     {
         $this->resources[] = $param;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getDefaultData(): array
+    {
+        return $this->defaultData;
+    }
+
+    /**
+     * @param mixed[] $defaultData
+     */
+    public function setDefaultData(array $defaultData): void
+    {
+        $this->defaultData = $defaultData;
     }
 }

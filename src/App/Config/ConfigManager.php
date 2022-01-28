@@ -30,6 +30,8 @@ class ConfigManager
 
     /** @var Type[] */
     private array $types;
+    /** @var string[] */
+    private array $resourcesInError = [];
 
     /** @var string[] */
     private array $hosts = [];
@@ -422,5 +424,21 @@ class ConfigManager
     public function setDocumentsToClean(array $documentsToClean): void
     {
         $this->documentsToClean = $documentsToClean;
+    }
+
+    public function addResourceInError(string $url): void
+    {
+        if (\in_array($url, $this->resourcesInError)) {
+            return;
+        }
+        $this->resourcesInError[] = $url;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getResourcesInError(): array
+    {
+        return $this->resourcesInError;
     }
 }

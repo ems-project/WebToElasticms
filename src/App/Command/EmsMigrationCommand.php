@@ -142,6 +142,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->progressStart($extractor->extractDataCount());
         foreach ($extractor->extractData() as $extractedData) {
             $updateManager->update($extractedData, $this->force);
+            $configManager->save($this->jsonPath);
             $this->io->progressAdvance();
         }
         $this->io->progressFinish();
