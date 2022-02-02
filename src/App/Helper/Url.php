@@ -38,7 +38,7 @@ class Url
 
         $host = $parsed['host'] ?? $relativeParsed['host'] ?? null;
         if (null === $host) {
-            throw new \RuntimeException('Unexpected null scheme');
+            throw new \RuntimeException('Unexpected null host');
         }
         $this->host = $host;
 
