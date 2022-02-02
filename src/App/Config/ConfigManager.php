@@ -209,9 +209,6 @@ class ConfigManager
     {
         foreach ($this->documents as $document) {
             $ouuid = $document->getOuuid();
-            if (null === $ouuid) {
-                continue;
-            }
             foreach ($document->getResources() as $resource) {
                 $resourceUrl = new Url($resource->getUrl());
                 if ($resourceUrl->getPath() === $url->getPath()) {

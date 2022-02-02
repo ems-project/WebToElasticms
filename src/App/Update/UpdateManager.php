@@ -29,7 +29,7 @@ class UpdateManager
         $data = $extractedData->getData();
         $type = $this->configManager->getType($extractedData->getDocument()->getType());
         $typeManager = $this->coreApi->data($extractedData->getDocument()->getType());
-        if (null === $ouuid || !$typeManager->head($ouuid)) {
+        if (!$typeManager->head($ouuid)) {
             $data = \array_merge_recursive($type->getDefaultData(), $data);
             $draft = $typeManager->create($data, $ouuid);
             try {
