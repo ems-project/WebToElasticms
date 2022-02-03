@@ -53,7 +53,7 @@ class InternalLink
                 $path = $this->config->findInternalLink($url);
                 $item->setAttribute($attribute, $path);
             } catch (\Throwable $e) {
-                $this->logger->warning(\sprintf('Error while getting the resource %s', $url->getUrl()));
+                $this->logger->warning(\sprintf('Error while getting the resource %s with message %s', $url->getUrl(), $e->getMessage()));
             }
         }
     }

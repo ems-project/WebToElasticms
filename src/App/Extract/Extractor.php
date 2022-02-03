@@ -49,7 +49,7 @@ class Extractor
             }
             $data = $document->getDefaultData();
             foreach ($document->getResources() as $resource) {
-                $this->logger->notice(\sprintf('Start extracting from %s',$resource->getUrl()));
+                $this->logger->notice(\sprintf('Start extracting from %s', $resource->getUrl()));
                 try {
                     $this->extractDataFromResource($document, $resource, $data);
                 } catch (ClientException $e) {
