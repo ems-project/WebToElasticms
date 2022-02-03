@@ -5,6 +5,10 @@ With this Symfony single command, you can update elasticms documents by tracking
 Usage 
  - `php application.php https://my-elasticms.com /path/to/a/json/config/file.json`
 
+If you are not using a Linux environment, we suggest you to use a PHP docker image. I.e. under Windows with Docker Desktop: 
+
+`docker run -it -v %cd%:/opt/src -w /opt/src elasticms/base-php-dev:7.4 php -d memory_limit=-1 application.php  https://my-elasticms.com /opt/src/config.json --cache-folder=/opt/src/cache`
+
 The JSON config file list all web resources to synchronise for each document.
 
 ```json
