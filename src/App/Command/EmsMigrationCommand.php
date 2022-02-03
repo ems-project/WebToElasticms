@@ -27,7 +27,8 @@ class EmsMigrationCommand extends AbstractCommand
 {
     private const ARG_CONFIG_FILE_PATH = 'json-path';
     private const ARG_ELASTICMS_URL = 'elasticms-url';
-    private const ARG_HASH_ALGO = 'hash-algo';
+    private const OPTION_HASH_ALGO = 'hash-algo';
+    private const OPTION_START_FROM = 'start-from';
     private const ARG_USERNAME = 'username';
     private const ARG_PASSWORD = 'password';
     public const OPTION_CACHE_FOLDER = 'cache-folder';
@@ -42,6 +43,7 @@ class EmsMigrationCommand extends AbstractCommand
     private StorageManager $storageManager;
     private string $cacheFolder;
     private bool $force;
+    private int $startFrom;
 
     protected function configure(): void
     {
@@ -58,11 +60,18 @@ class EmsMigrationCommand extends AbstractCommand
                 'Path to an config file (JSON) see documentation'
             )
             ->addOption(
-                self::ARG_HASH_ALGO,
+                self::OPTION_HASH_ALGO,
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Algorithm used to hash assets',
                 'sha1'
+            )
+            ->addOption(
+                self::OPTION_START_FROM,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Start migrate from document x',
+                0
             )
             ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
@@ -77,8 +86,9 @@ class EmsMigrationCommand extends AbstractCommand
         $elasticmsUrl = $this->getArgumentString(self::ARG_ELASTICMS_URL);
         $this->jsonPath = $this->getArgumentString(self::ARG_CONFIG_FILE_PATH);
         $this->force = $this->getOptionBool(self::OPTION_FORCE);
+        $this->startFrom = $this->getOptionInt(self::OPTION_START_FROM);
         $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
-        $hash = $this->getOptionString(self::ARG_HASH_ALGO);
+        $hash = $this->getOptionString(self::OPTION_HASH_ALGO);
         $client = new Client($elasticmsUrl, $this->logger);
         $fileLocator = new FileLocator();
         $this->storageManager = new StorageManager($this->logger, $fileLocator, [], $hash);
@@ -140,7 +150,8 @@ class EmsMigrationCommand extends AbstractCommand
 
         $this->io->section('Start updates');
         $this->io->progressStart($extractor->extractDataCount());
-        foreach ($extractor->extractData() as $extractedData) {
+        $this->io->progressAdvance($this->startFrom);
+        foreach ($extractor->extractData($this->startFrom) as $extractedData) {
             $updateManager->update($extractedData, $this->force);
             $configManager->save($this->jsonPath);
             $this->io->progressAdvance();

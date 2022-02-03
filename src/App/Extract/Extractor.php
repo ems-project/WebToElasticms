@@ -40,11 +40,16 @@ class Extractor
     /**
      * @return iterable<ExtractedData>
      */
-    public function extractData(): iterable
+    public function extractData(int $startFrom): iterable
     {
+        $counter = 0;
         foreach ($this->config->getDocuments() as $document) {
+            if ($counter++ < $startFrom) {
+                continue;
+            }
             $data = $document->getDefaultData();
             foreach ($document->getResources() as $resource) {
+                $this->logger->notice(\sprintf('Start extracting from %s',$resource->getUrl()));
                 try {
                     $this->extractDataFromResource($document, $resource, $data);
                 } catch (ClientException $e) {
