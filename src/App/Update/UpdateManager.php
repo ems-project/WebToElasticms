@@ -32,7 +32,7 @@ class UpdateManager
         $typeManager = $this->coreApi->data($extractedData->getDocument()->getType());
         if (!$typeManager->head($ouuid)) {
             $data = \array_merge_recursive($type->getDefaultData(), $data);
-            $this->logger->notice(Json::encode($data, true));
+            $this->logger->debug(Json::encode($data, true));
             $draft = $typeManager->create($data, $ouuid);
             try {
                 $ouuid = $typeManager->finalize($draft->getRevisionId());
@@ -47,7 +47,7 @@ class UpdateManager
                 return;
             }
             try {
-                $this->logger->notice(Json::encode($data, true));
+                $this->logger->debug(Json::encode($data, true));
                 $typeManager->save($ouuid, $data);
                 $this->configManager->setLastUpdated($ouuid);
             } catch (\Throwable $e) {
