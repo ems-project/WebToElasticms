@@ -7,6 +7,7 @@ namespace App\Update;
 use App\Config\ConfigManager;
 use App\Extract\ExtractedData;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
+use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiExceptionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -31,9 +32,11 @@ class UpdateManager
         $typeManager = $this->coreApi->data($extractedData->getDocument()->getType());
         if (!$typeManager->head($ouuid)) {
             $data = \array_merge_recursive($type->getDefaultData(), $data);
+            $this->logger->notice(Json::encode($data, true));
             $draft = $typeManager->create($data, $ouuid);
             try {
                 $ouuid = $typeManager->finalize($draft->getRevisionId());
+                $this->configManager->setLastUpdated($ouuid);
             } catch (CoreApiExceptionInterface $e) {
                 $typeManager->discard($draft->getRevisionId());
             }
@@ -44,7 +47,9 @@ class UpdateManager
                 return;
             }
             try {
+                $this->logger->notice(Json::encode($data, true));
                 $typeManager->save($ouuid, $data);
+                $this->configManager->setLastUpdated($ouuid);
             } catch (\Throwable $e) {
                 $this->logger->error(\sprintf('Impossible to finalize the document %s with the error %s', $ouuid, $e->getMessage()));
             }

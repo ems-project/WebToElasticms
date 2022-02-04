@@ -37,14 +37,34 @@ class Extractor
         return \count($this->config->getDocuments());
     }
 
+    public function currentStep(): int
+    {
+        $lastUpdated = $this->config->getLastUpdated();
+        if (null === $lastUpdated) {
+            return 0;
+        }
+        $count = 1;
+        foreach ($this->config->getDocuments() as $document) {
+            if ($document->getOuuid() === $lastUpdated) {
+                return $count;
+            }
+            ++$count;
+        }
+
+        return 0;
+    }
+
     /**
      * @return iterable<ExtractedData>
      */
-    public function extractData(int $startFrom): iterable
+    public function extractData(): iterable
     {
         $counter = 0;
+        $lastUpdated = $this->config->getLastUpdated();
+        $found = (null === $lastUpdated);
         foreach ($this->config->getDocuments() as $document) {
-            if ($counter++ < $startFrom) {
+            if (!$found) {
+                $found = ($document->getOuuid() === $lastUpdated);
                 continue;
             }
             $data = $document->getDefaultData();
@@ -151,5 +171,12 @@ class Extractor
         $property = Document::fieldPathToPropertyPath($computer->getProperty());
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $propertyAccessor->setValue($data, $property, $value);
+    }
+
+    public function reset(): void
+    {
+        $this->config->setLastUpdated(null);
+        $this->config->setUrlsNotFound([]);
+        $this->config->setResourcesInError([]);
     }
 }

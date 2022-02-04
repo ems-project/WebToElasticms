@@ -57,6 +57,7 @@ class ConfigManager
      * @var array<string, string[]>
      */
     private array $documentsToClean = [];
+    private ?string $lastUpdated = null;
 
     public function serialize(string $format = JsonEncoder::FORMAT): string
     {
@@ -69,7 +70,6 @@ class ConfigManager
         $config->cacheManager = $cache;
         $config->coreApi = $coreApi;
         $config->logger = $logger;
-        $config->urlsNotFound = [];
 
         return $config;
     }
@@ -85,7 +85,7 @@ class ConfigManager
             new ObjectNormalizer(null, null, null, $propertyTypeExtractor),
         ], [
             new XmlEncoder(),
-            new JsonEncoder(new JsonEncode([JsonEncode::OPTIONS => JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES]), null),
+            new JsonEncoder(new JsonEncode([JsonEncode::OPTIONS => JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES]), null),
         ]);
     }
 
@@ -298,8 +298,12 @@ class ConfigManager
         throw new \RuntimeException(\sprintf('Type %s not found', $name));
     }
 
-    public function save(string $jsonPath): bool
+    public function save(string $jsonPath, bool $finish = false): bool
     {
+        if ($finish) {
+            $this->lastUpdated = null;
+        }
+
         return false !== \file_put_contents($jsonPath, $this->serialize());
     }
 
@@ -437,5 +441,31 @@ class ConfigManager
     public function getResourcesInError(): array
     {
         return $this->resourcesInError;
+    }
+
+    /**
+     * @param string[] $resourcesInError
+     */
+    public function setResourcesInError(array $resourcesInError): void
+    {
+        $this->resourcesInError = $resourcesInError;
+    }
+
+    /**
+     * @param string[] $urlsNotFound
+     */
+    public function setUrlsNotFound(array $urlsNotFound): void
+    {
+        $this->urlsNotFound = $urlsNotFound;
+    }
+
+    public function getLastUpdated(): ?string
+    {
+        return $this->lastUpdated;
+    }
+
+    public function setLastUpdated(?string $lastUpdated): void
+    {
+        $this->lastUpdated = $lastUpdated;
     }
 }
