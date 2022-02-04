@@ -59,7 +59,6 @@ class Extractor
      */
     public function extractData(): iterable
     {
-        $counter = 0;
         $lastUpdated = $this->config->getLastUpdated();
         $found = (null === $lastUpdated);
         foreach ($this->config->getDocuments() as $document) {
@@ -67,7 +66,8 @@ class Extractor
                 $found = ($document->getOuuid() === $lastUpdated);
                 continue;
             }
-            $data = $document->getDefaultData();
+            $defaultData = $document->getDefaultData();
+            $data = $defaultData;
             foreach ($document->getResources() as $resource) {
                 $this->logger->notice(\sprintf('Start extracting from %s', $resource->getUrl()));
                 try {
@@ -80,8 +80,9 @@ class Extractor
                     $this->logger->error(\sprintf('Error getting url %s with error %s', $resource->getUrl(), $e->getMessage()));
                 }
             }
-            if (empty($data)) {
-                $this->logger->warning(\sprintf('Nothing has been extracted for this config %s', Json::encode($document)));
+
+            if ($data === $defaultData) {
+                $this->logger->warning(\sprintf('Document %s: nothing has been extracted for this config %s', $document->getOuuid(), Json::encode($document)));
                 continue;
             }
 
