@@ -14,8 +14,9 @@ class Url
     private string $path;
     private ?string $query;
     private ?string $fragment;
+    private ?string $referer;
 
-    public function __construct(string $url, string $relativeToUrl = null)
+    public function __construct(string $url, string $referer = null)
     {
         $parsed = \parse_url($url);
         if (false === $parsed) {
@@ -23,11 +24,11 @@ class Url
         }
 
         $relativeParsed = [];
-        if (null !== $relativeToUrl) {
-            $relativeParsed = \parse_url($relativeToUrl);
+        if (null !== $referer) {
+            $relativeParsed = \parse_url($referer);
         }
         if (false === $relativeParsed) {
-            throw new \RuntimeException(\sprintf('Unexpected wrong url %s', $relativeToUrl));
+            throw new \RuntimeException(\sprintf('Unexpected wrong url %s', $referer));
         }
 
         $scheme = $parsed['scheme'] ?? $relativeParsed['scheme'] ?? null;
@@ -42,6 +43,7 @@ class Url
         }
         $this->host = $host;
 
+        $this->referer = $referer;
         $this->user = $parsed['user'] ?? $relativeParsed['user'] ?? null;
         $this->password = $parsed['pass'] ?? $relativeParsed['pass'] ?? null;
         $this->port = $parsed['port'] ?? $relativeParsed['port'] ?? null;
@@ -142,5 +144,10 @@ class Url
         }
 
         return $name;
+    }
+
+    public function getReferer(): ?string
+    {
+        return $this->referer;
     }
 }

@@ -165,7 +165,7 @@ class ConfigManager
             return $this->linksByUrl[$url->getPath()];
         }
 
-        if (\in_array($url->getPath(), $this->urlsNotFound)) {
+        if (isset($this->urlsNotFound[$url->getPath()])) {
             return $url->getPath();
         }
 
@@ -176,7 +176,7 @@ class ConfigManager
         if (null === $path) {
             $path = $url->getPath();
             $this->logger->warning(\sprintf('It was not possible to convert the path %s', $path));
-            $this->urlsNotFound[] = $url->getPath();
+            $this->urlsNotFound[$url->getPath()] = $url->getReferer();
         }
 
         if (null !== $url->getFragment()) {
