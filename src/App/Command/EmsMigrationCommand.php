@@ -33,6 +33,7 @@ class EmsMigrationCommand extends AbstractCommand
     private const ARG_PASSWORD = 'password';
     public const OPTION_CACHE_FOLDER = 'cache-folder';
     public const OPTION_FORCE = 'force';
+    public const OPTION_DRY_RUN = 'dry-run';
     protected static $defaultName = 'ems:migrate';
     private ConsoleLogger $logger;
     private CoreApi $coreApi;
@@ -44,6 +45,7 @@ class EmsMigrationCommand extends AbstractCommand
     private string $cacheFolder;
     private bool $force;
     private bool $continue;
+    private bool $dryRun;
 
     protected function configure(): void
     {
@@ -75,6 +77,7 @@ class EmsMigrationCommand extends AbstractCommand
             ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
             ->addOption(self::OPTION_FORCE, null, InputOption::VALUE_NONE, 'force update all documents')
+            ->addOption(self::OPTION_DRY_RUN, null, InputOption::VALUE_NONE, 'don\'t update elasticms')
             ->addOption(self::OPTION_CACHE_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where cache will stored', \implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'WebToElasticms']));
     }
 
@@ -86,6 +89,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->jsonPath = $this->getArgumentString(self::ARG_CONFIG_FILE_PATH);
         $this->force = $this->getOptionBool(self::OPTION_FORCE);
         $this->continue = $this->getOptionBool(self::OPTION_CONTINUE);
+        $this->dryRun = $this->getOptionBool(self::OPTION_DRY_RUN);
         $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
         $hash = $this->getOptionString(self::OPTION_HASH_ALGO);
         $client = new Client($elasticmsUrl, $this->logger);
@@ -130,7 +134,7 @@ class EmsMigrationCommand extends AbstractCommand
         $cacheManager = new CacheManager($this->cacheFolder);
         $configManager = $this->loadConfigManager($cacheManager);
         $extractor = new Extractor($configManager, $cacheManager, $this->logger);
-        $updateManager = new UpdateManager($this->coreApi, $configManager, $this->logger);
+        $updateManager = new UpdateManager($this->coreApi, $configManager, $this->logger, $this->dryRun);
 
         $this->io->section('Start cleaning');
         foreach ($configManager->getDocumentsToClean() as $contentType => $documents) {

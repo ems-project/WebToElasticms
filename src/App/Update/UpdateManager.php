@@ -16,12 +16,14 @@ class UpdateManager
     private CoreApi $coreApi;
     private ConfigManager $configManager;
     private LoggerInterface $logger;
+    private bool $dryRun;
 
-    public function __construct(CoreApi $coreApi, ConfigManager $configManager, LoggerInterface $logger)
+    public function __construct(CoreApi $coreApi, ConfigManager $configManager, LoggerInterface $logger, bool $dryRun)
     {
         $this->coreApi = $coreApi;
         $this->configManager = $configManager;
         $this->logger = $logger;
+        $this->dryRun = $dryRun;
     }
 
     public function update(ExtractedData $extractedData, bool $force): void
@@ -33,6 +35,9 @@ class UpdateManager
         if (!$typeManager->head($ouuid)) {
             $data = \array_merge_recursive($type->getDefaultData(), $data);
             $this->logger->debug(Json::encode($data, true));
+            if ($this->dryRun) {
+                return;
+            }
             $draft = $typeManager->create($data, $ouuid);
             try {
                 $ouuid = $typeManager->finalize($draft->getRevisionId());
@@ -48,6 +53,9 @@ class UpdateManager
             }
             try {
                 $this->logger->debug(Json::encode($data, true));
+                if ($this->dryRun) {
+                    return;
+                }
                 $typeManager->save($ouuid, $data);
                 $this->configManager->setLastUpdated($ouuid);
             } catch (\Throwable $e) {
