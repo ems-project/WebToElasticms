@@ -16,11 +16,11 @@ class Rapport
     /** @var string[][] */
     private array $missingInternalUrls = [['Path', 'URL', 'Code', 'Message', 'Referrers']];
     /** @var string[][] */
-    private array $nothingExtracted = [['Type', 'OUUIS', 'URLs']];
+    private array $nothingExtracted = [['Type', 'OUUID', 'URLs']];
     /** @var string[][] */
-    private array $extractErrors = [['Type', 'URL', 'locale', 'selector', 'property', 'attribute', 'count']];
+    private array $extractErrors = [['Type', 'URL', 'Locale', 'Selector', 'Property', 'Attribute', 'Count']];
     /** @var string[][] */
-    private array $urlsInError = [['URLs', 'Locale', 'Type', 'Code', 'Message']];
+    private array $urlsInError = [['Doc\'s URLs', 'URLs', 'Code', 'Message']];
     private string $filename;
     private SpreadsheetGeneratorService $spreadsheetGeneratorService;
     private CacheManager $cacheManager;
@@ -95,9 +95,9 @@ class Rapport
         $this->missingInternalUrls[$url->getPath()] = [$url->getPath(), $url->getUrl(), \strval($code), $message, $url->getReferer() ?? 'N/A'];
     }
 
-    public function addResourceInError(WebResource $resource, int $code, string $message): void
+    public function addResourceInError(WebResource $resource, Url $url, int $code, string $message): void
     {
-        $this->urlsInError[] = [$resource->getUrl(), $resource->getLocale(), $resource->getType(), \strval($code), $message];
+        $this->urlsInError[] = [$resource->getUrl(), $url->getUrl(), \strval($code), $message];
     }
 
     public function addNothingExtracted(Document $document): void

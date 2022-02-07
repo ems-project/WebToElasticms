@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Filter\Html;
 
 use App\Config\ConfigManager;
+use App\Config\WebResource;
 use Symfony\Component\DomCrawler\Crawler;
 
-class StyleCleaner
+class StyleCleaner implements HtmlInterface
 {
     public const TYPE = 'style-cleaner';
     private ConfigManager $config;
@@ -17,7 +18,7 @@ class StyleCleaner
         $this->config = $config;
     }
 
-    public function process(Crawler $content): void
+    public function process(WebResource $resource, Crawler $content): void
     {
         foreach ($content->filter('[style]') as $item) {
             if (!$item instanceof \DOMElement) {

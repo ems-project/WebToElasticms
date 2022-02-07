@@ -94,7 +94,7 @@ class Html
                 default:
                     throw new \RuntimeException(\sprintf('Unexpected %s filter', $filterType));
             }
-            $filter->process($content);
+            $filter->process($resource, $content);
         }
 
         return $asHtml ? $content->html() : $content->text();

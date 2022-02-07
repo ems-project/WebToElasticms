@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Filter\Html;
 
 use App\Config\ConfigManager;
+use App\Config\WebResource;
 use App\Helper\Url;
 use App\Rapport\Rapport;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
-class InternalLink
+class InternalLink implements HtmlInterface
 {
     public const TYPE = 'internal-link';
     private ConfigManager $config;
@@ -26,13 +29,13 @@ class InternalLink
         $this->rapport = $rapport;
     }
 
-    public function process(Crawler $content): void
+    public function process(WebResource $resource, Crawler $content): void
     {
-        $this->convertAttribute($content, 'src');
-        $this->convertAttribute($content, 'href');
+        $this->convertAttribute($resource, $content, 'src');
+        $this->convertAttribute($resource, $content, 'href');
     }
 
-    protected function convertAttribute(Crawler $content, string $attribute): void
+    protected function convertAttribute(WebResource $resource, Crawler $content, string $attribute): void
     {
         foreach ($content->filter("[$attribute]") as $item) {
             if (!$item instanceof \DOMElement) {
@@ -52,12 +55,14 @@ class InternalLink
             if ($this->isLinkToRemove($item, $path)) {
                 continue;
             }
-//            try {
-            $path = $this->config->findInternalLink($url, $this->rapport);
-            $item->setAttribute($attribute, $path);
-//            } catch (\Throwable $e) {
-//                $this->logger->warning(\sprintf('Error while converting the internal link %s with message %s', $url->getUrl(), $e->getMessage()));
-//            }
+            try {
+                $path = $this->config->findInternalLink($url, $this->rapport);
+                $item->setAttribute($attribute, $path);
+            } catch (ClientException $e) {
+                $this->rapport->addResourceInError($resource, $url, $e->getCode(), $e->getMessage());
+            } catch (RequestException $e) {
+                $this->rapport->addResourceInError($resource, $url, $e->getCode(), $e->getMessage());
+            }
         }
     }
 

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Filter\Html;
 
 use App\Config\ConfigManager;
+use App\Config\WebResource;
 use Symfony\Component\DomCrawler\Crawler;
 
-class Striptag
+class Striptag implements HtmlInterface
 {
     public const TYPE = 'striptags';
     private ConfigManager $config;
@@ -17,7 +18,7 @@ class Striptag
         $this->config = $config;
     }
 
-    public function process(Crawler $content): void
+    public function process(WebResource $resource, Crawler $content): void
     {
     }
 }

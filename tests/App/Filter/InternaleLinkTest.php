@@ -6,6 +6,7 @@ namespace App\Tests\Filter\Html;
 
 use App\Cache\CacheManager;
 use App\Config\ConfigManager;
+use App\Config\WebResource;
 use App\Filter\Html\InternalLink;
 use App\Rapport\Rapport;
 use PHPUnit\Framework\TestCase;
@@ -16,6 +17,7 @@ class InternaleLinkTest extends TestCase
 {
     public function testInternalLink(): void
     {
+        $webResource = new WebResource('mock', 'mock', 'mock');
         $config = $this->createMock(ConfigManager::class);
         $logger = $this->createMock(LoggerInterface::class);
         $config->method('getHosts')
@@ -37,7 +39,7 @@ class InternaleLinkTest extends TestCase
 <div style="padding: inherit;"><a href="https://www.google.com">Google</a></div>
 <div style="padding: inherit;"><a href="//www.google.com">Google</a></div>');
 
-        $internalLink->process($crawler->filter('body'));
+        $internalLink->process($webResource, $crawler->filter('body'));
         $this->assertEquals(
 '<div style="padding: inherit;"><a href="ems://object:page:ouuid">Url</a></div>
 <div style="padding: inherit;"><a href="ems://object:page:ouuid">Url</a></div>
@@ -50,6 +52,7 @@ class InternaleLinkTest extends TestCase
 
     public function testLinkToClean(): void
     {
+        $webResource = new WebResource('mock', 'mock', 'mock');
         $cacheManager = new CacheManager(\sys_get_temp_dir());
         $rapport = new Rapport($cacheManager, \sys_get_temp_dir());
         $config = $this->createMock(ConfigManager::class);
@@ -67,7 +70,7 @@ class InternaleLinkTest extends TestCase
 <div style="padding: inherit;"><a href="/autre">link</a> toto <a href="/fr/glossaire">link</a> totot</div>');
         $internalLink = new InternalLink($logger, $config, $rapport, 'https://demo.com/a/b');
 
-        $internalLink->process($crawler->filter('body'));
+        $internalLink->process($webResource, $crawler->filter('body'));
         $this->assertEquals('<div style="padding: inherit;">Url</div>
 <div style="padding: inherit;">link</div>
 <div style="padding: inherit;">link</div>

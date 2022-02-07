@@ -9,6 +9,7 @@ use App\Config\Computer;
 use App\Config\ConfigManager;
 use App\Config\WebResource;
 use App\Helper\ExpressionData;
+use App\Helper\Url;
 use App\Rapport\Rapport;
 use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\Document;
@@ -71,18 +72,21 @@ class Extractor
             }
             $defaultData = $document->getDefaultData();
             $data = $defaultData;
+            $withoutError = true;
             foreach ($document->getResources() as $resource) {
                 $this->logger->notice(\sprintf('Start extracting from %s', $resource->getUrl()));
                 try {
                     $this->extractDataFromResource($document, $resource, $data);
                 } catch (ClientException $e) {
-                    $rapport->addResourceInError($resource, $e->getCode(), $e->getMessage());
+                    $rapport->addResourceInError($resource, new Url($resource->getUrl()), $e->getCode(), $e->getMessage());
+                    $withoutError = false;
                 } catch (RequestException $e) {
-                    $rapport->addResourceInError($resource, $e->getCode(), $e->getMessage());
+                    $rapport->addResourceInError($resource, new Url($resource->getUrl()), $e->getCode(), $e->getMessage());
+                    $withoutError = false;
                 }
             }
 
-            if ($data === $defaultData) {
+            if ($withoutError && $data === $defaultData) {
                 $rapport->addNothingExtracted($document);
                 continue;
             }
