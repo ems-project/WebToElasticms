@@ -36,4 +36,9 @@ class CacheManager
     {
         return new HttpResult($this->client->get($url));
     }
+
+    public function head(string $url): HttpResult
+    {
+        return new HttpResult($this->client->head($url));
+    }
 }

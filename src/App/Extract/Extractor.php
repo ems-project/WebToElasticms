@@ -9,6 +9,7 @@ use App\Config\Computer;
 use App\Config\ConfigManager;
 use App\Config\WebResource;
 use App\Helper\ExpressionData;
+use App\Rapport\Rapport;
 use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\Document;
 use GuzzleHttp\Exception\ClientException;
@@ -23,12 +24,14 @@ class Extractor
     private CacheManager $cache;
     private ExpressionLanguage $expressionLanguage;
     private LoggerInterface $logger;
+    private Rapport $rapport;
 
-    public function __construct(ConfigManager $config, CacheManager $cache, LoggerInterface $logger)
+    public function __construct(ConfigManager $config, CacheManager $cache, LoggerInterface $logger, Rapport $rapport)
     {
         $this->config = $config;
         $this->cache = $cache;
         $this->logger = $logger;
+        $this->rapport = $rapport;
         $this->expressionLanguage = $config->getExpressionLanguage();
     }
 
@@ -57,7 +60,7 @@ class Extractor
     /**
      * @return iterable<ExtractedData>
      */
-    public function extractData(): iterable
+    public function extractData(Rapport $rapport): iterable
     {
         $lastUpdated = $this->config->getLastUpdated();
         $found = (null === $lastUpdated);
@@ -73,16 +76,14 @@ class Extractor
                 try {
                     $this->extractDataFromResource($document, $resource, $data);
                 } catch (ClientException $e) {
-                    $this->config->addResourceInError($resource->getUrl());
-                    $this->logger->error(\sprintf('Error getting url %s with error %s', $resource->getUrl(), $e->getMessage()));
+                    $rapport->addResourceInError($resource, $e->getCode(), $e->getMessage());
                 } catch (RequestException $e) {
-                    $this->config->addResourceInError($resource->getUrl());
-                    $this->logger->error(\sprintf('Error getting url %s with error %s', $resource->getUrl(), $e->getMessage()));
+                    $rapport->addResourceInError($resource, $e->getCode(), $e->getMessage());
                 }
             }
 
             if ($data === $defaultData) {
-                $this->logger->warning(\sprintf('Document %s: nothing has been extracted for this config %s', $document->getOuuid(), Json::encode($document)));
+                $rapport->addNothingExtracted($document);
                 continue;
             }
 
@@ -118,7 +119,7 @@ class Extractor
         $analyzer = $this->config->getAnalyzer($resource->getType());
         switch ($analyzer->getType()) {
             case Html::TYPE:
-                $extractor = new Html($this->config, $document, $this->logger);
+                $extractor = new Html($this->config, $document, $this->logger, $this->rapport);
                 break;
             default:
                 throw new \RuntimeException(\sprintf('Type of analyzer %s unknown', $analyzer->getType()));
@@ -177,7 +178,5 @@ class Extractor
     public function reset(): void
     {
         $this->config->setLastUpdated(null);
-        $this->config->setUrlsNotFound([]);
-        $this->config->setResourcesInError([]);
     }
 }

@@ -6,6 +6,7 @@ namespace App\Config;
 
 use App\Cache\CacheManager;
 use App\Helper\Url;
+use App\Rapport\Rapport;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
 use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
@@ -30,8 +31,6 @@ class ConfigManager
 
     /** @var Type[] */
     private array $types;
-    /** @var string[] */
-    private array $resourcesInError = [];
 
     /** @var string[] */
     private array $hosts = [];
@@ -49,8 +48,6 @@ class ConfigManager
     private string $hashResourcesField = 'import_hash_resources';
     private ?string $autoDiscoverResourcesLink = null;
     private ?string $ignoreResourceLinkPattern = null;
-    /** @var string[] */
-    private array $urlsNotFound = [];
     /** @var string[] */
     private array $linksByUrl = [];
     /**
@@ -159,13 +156,13 @@ class ConfigManager
         $this->hosts = $hosts;
     }
 
-    public function findInternalLink(Url $url): string
+    public function findInternalLink(Url $url, Rapport $rapport): string
     {
         if (isset($this->linksByUrl[$url->getPath()])) {
             return $this->linksByUrl[$url->getPath()];
         }
 
-        if (isset($this->urlsNotFound[$url->getPath()])) {
+        if ($rapport->inUrlsNotFounds($url)) {
             return $url->getPath();
         }
 
@@ -175,8 +172,7 @@ class ConfigManager
         }
         if (null === $path) {
             $path = $url->getPath();
-            $this->logger->warning(\sprintf('It was not possible to convert the path %s', $path));
-            $this->urlsNotFound[$url->getPath()] = $url->getReferer();
+            $rapport->addUrlNotFound($url);
         }
 
         if (null !== $url->getFragment()) {
@@ -390,14 +386,6 @@ class ConfigManager
     /**
      * @return string[]
      */
-    public function getUrlsNotFound(): array
-    {
-        return $this->urlsNotFound;
-    }
-
-    /**
-     * @return string[]
-     */
     public function getLinksByUrl(): array
     {
         return $this->linksByUrl;
@@ -425,38 +413,6 @@ class ConfigManager
     public function setDocumentsToClean(array $documentsToClean): void
     {
         $this->documentsToClean = $documentsToClean;
-    }
-
-    public function addResourceInError(string $url): void
-    {
-        if (\in_array($url, $this->resourcesInError)) {
-            return;
-        }
-        $this->resourcesInError[] = $url;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getResourcesInError(): array
-    {
-        return $this->resourcesInError;
-    }
-
-    /**
-     * @param string[] $resourcesInError
-     */
-    public function setResourcesInError(array $resourcesInError): void
-    {
-        $this->resourcesInError = $resourcesInError;
-    }
-
-    /**
-     * @param string[] $urlsNotFound
-     */
-    public function setUrlsNotFound(array $urlsNotFound): void
-    {
-        $this->urlsNotFound = $urlsNotFound;
     }
 
     public function getLastUpdated(): ?string

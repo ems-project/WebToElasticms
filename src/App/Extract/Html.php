@@ -15,6 +15,7 @@ use App\Filter\Html\InternalLink;
 use App\Filter\Html\Striptag;
 use App\Filter\Html\StyleCleaner;
 use App\Helper\Url;
+use App\Rapport\Rapport;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -25,12 +26,14 @@ class Html
     private ConfigManager $config;
     private Document $document;
     private LoggerInterface $logger;
+    private Rapport $rapport;
 
-    public function __construct(ConfigManager $config, Document $document, LoggerInterface $logger)
+    public function __construct(ConfigManager $config, Document $document, LoggerInterface $logger, Rapport $rapport)
     {
         $this->config = $config;
         $this->document = $document;
         $this->logger = $logger;
+        $this->rapport = $rapport;
     }
 
     /**
@@ -43,7 +46,7 @@ class Html
         foreach ($analyzer->getExtractors() as $extractor) {
             $content = $crawler->filter($extractor->getSelector());
             if (1 !== $content->count()) {
-                $this->logger->warning(\sprintf('The resource %s can be extracted has there is %d nodes found for the selector %s', $resource->getUrl(), $content->count(), $extractor->getSelector()));
+                $this->rapport->addExtractError($resource, $extractor, $content->count());
                 continue;
             }
             $attribute = $extractor->getAttribute();
@@ -53,7 +56,7 @@ class Html
                     $html = $this->applyAttrFilters($resource, $html, $extractor);
                 }
             } else {
-                $html = $this->applyFilters($resource, $content, $extractor);
+                $html = $this->applyFilters($resource, $content, $extractor, $this->rapport);
             }
             $this->assignExtractedProperty($resource, $extractor, $data, $html);
         }
@@ -70,7 +73,7 @@ class Html
         $propertyAccessor->setValue($data, $property, $content);
     }
 
-    private function applyFilters(WebResource $resource, Crawler $content, \App\Config\Extractor $extractor): string
+    private function applyFilters(WebResource $resource, Crawler $content, \App\Config\Extractor $extractor, Rapport $rapport): string
     {
         $asHtml = true;
         foreach ($extractor->getFilters() as $filterType) {
@@ -80,7 +83,7 @@ class Html
                     $asHtml = false;
                     break;
                 case InternalLink::TYPE:
-                    $filter = new InternalLink($this->logger, $this->config, $resource->getUrl());
+                    $filter = new InternalLink($this->logger, $this->config, $rapport, $resource->getUrl());
                     break;
                 case StyleCleaner::TYPE:
                     $filter = new StyleCleaner($this->config);

@@ -6,6 +6,7 @@ namespace App\Filter\Html;
 
 use App\Config\ConfigManager;
 use App\Helper\Url;
+use App\Rapport\Rapport;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -15,12 +16,14 @@ class InternalLink
     private ConfigManager $config;
     private string $currentUrl;
     private LoggerInterface $logger;
+    private Rapport $rapport;
 
-    public function __construct(LoggerInterface $logger, ConfigManager $config, string $currentUrl)
+    public function __construct(LoggerInterface $logger, ConfigManager $config, Rapport $rapport, string $currentUrl)
     {
         $this->config = $config;
         $this->currentUrl = $currentUrl;
         $this->logger = $logger;
+        $this->rapport = $rapport;
     }
 
     public function process(Crawler $content): void
@@ -49,12 +52,12 @@ class InternalLink
             if ($this->isLinkToRemove($item, $path)) {
                 continue;
             }
-            try {
-                $path = $this->config->findInternalLink($url);
-                $item->setAttribute($attribute, $path);
-            } catch (\Throwable $e) {
-                $this->logger->warning(\sprintf('Error while getting the resource %s with message %s', $url->getUrl(), $e->getMessage()));
-            }
+//            try {
+            $path = $this->config->findInternalLink($url, $this->rapport);
+            $item->setAttribute($attribute, $path);
+//            } catch (\Throwable $e) {
+//                $this->logger->warning(\sprintf('Error while converting the internal link %s with message %s', $url->getUrl(), $e->getMessage()));
+//            }
         }
     }
 

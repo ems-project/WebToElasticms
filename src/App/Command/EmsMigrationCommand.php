@@ -138,7 +138,8 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->section('Load config');
         $cacheManager = new CacheManager($this->cacheFolder);
         $configManager = $this->loadConfigManager($cacheManager);
-        $extractor = new Extractor($configManager, $cacheManager, $this->logger);
+        $rapport = new Rapport($cacheManager, $this->rapportsFolder);
+        $extractor = new Extractor($configManager, $cacheManager, $this->logger, $rapport);
         $updateManager = new UpdateManager($this->coreApi, $configManager, $this->logger, $this->dryRun);
 
         $this->io->section('Start cleaning');
@@ -161,10 +162,9 @@ class EmsMigrationCommand extends AbstractCommand
         }
 
         $this->io->section('Start updates');
-        $rapport = new Rapport($this->rapportsFolder);
         $this->io->progressStart($extractor->extractDataCount());
         $this->io->progressAdvance($extractor->currentStep());
-        foreach ($extractor->extractData() as $extractedData) {
+        foreach ($extractor->extractData($rapport) as $extractedData) {
             $updateManager->update($extractedData, $this->force);
             $configManager->save($this->jsonPath);
             $rapport->save();
