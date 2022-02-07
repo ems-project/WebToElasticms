@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Config\ConfigManager;
 use App\Extract\Extractor;
+use App\Rapport\Rapport;
 use App\Update\UpdateManager;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
@@ -34,6 +35,7 @@ class EmsMigrationCommand extends AbstractCommand
     public const OPTION_CACHE_FOLDER = 'cache-folder';
     public const OPTION_FORCE = 'force';
     public const OPTION_DRY_RUN = 'dry-run';
+    public const OPTION_RAPPORTS_FOLDER = 'rapports-folder';
     protected static $defaultName = 'ems:migrate';
     private ConsoleLogger $logger;
     private CoreApi $coreApi;
@@ -46,6 +48,7 @@ class EmsMigrationCommand extends AbstractCommand
     private bool $force;
     private bool $continue;
     private bool $dryRun;
+    private string $rapportsFolder;
 
     protected function configure(): void
     {
@@ -78,6 +81,7 @@ class EmsMigrationCommand extends AbstractCommand
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
             ->addOption(self::OPTION_FORCE, null, InputOption::VALUE_NONE, 'force update all documents')
             ->addOption(self::OPTION_DRY_RUN, null, InputOption::VALUE_NONE, 'don\'t update elasticms')
+            ->addOption(self::OPTION_RAPPORTS_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where rapports stored', \getcwd())
             ->addOption(self::OPTION_CACHE_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where cache will stored', \implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'WebToElasticms']));
     }
 
@@ -91,6 +95,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->continue = $this->getOptionBool(self::OPTION_CONTINUE);
         $this->dryRun = $this->getOptionBool(self::OPTION_DRY_RUN);
         $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
+        $this->rapportsFolder = $this->getOptionString(self::OPTION_RAPPORTS_FOLDER);
         $hash = $this->getOptionString(self::OPTION_HASH_ALGO);
         $client = new Client($elasticmsUrl, $this->logger);
         $fileLocator = new FileLocator();
@@ -156,11 +161,13 @@ class EmsMigrationCommand extends AbstractCommand
         }
 
         $this->io->section('Start updates');
+        $rapport = new Rapport($this->rapportsFolder);
         $this->io->progressStart($extractor->extractDataCount());
         $this->io->progressAdvance($extractor->currentStep());
         foreach ($extractor->extractData() as $extractedData) {
             $updateManager->update($extractedData, $this->force);
             $configManager->save($this->jsonPath);
+            $rapport->save();
             $this->io->progressAdvance();
         }
         $this->io->progressFinish();
@@ -168,6 +175,7 @@ class EmsMigrationCommand extends AbstractCommand
 
         $this->io->section('Save config');
         $configManager->save($this->jsonPath, true);
+        $rapport->save();
 
         return self::EXECUTE_SUCCESS;
     }
