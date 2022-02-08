@@ -43,6 +43,9 @@ class InternalLink implements HtmlInterface
             }
 
             $href = $item->getAttribute($attribute);
+            if (0 === \strpos($href, 'ems://')) {
+                continue;
+            }
             $url = new Url($href, $this->currentUrl);
 
             if (\in_array($url->getScheme(), ['mailto'])) {
