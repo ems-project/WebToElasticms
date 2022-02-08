@@ -61,6 +61,16 @@ class Html
             }
 
             switch ($extractor->getStrategy()) {
+                case \App\Config\Extractor::FIRST:
+                    if (count($basket) === 0) {
+                        $this->rapport->addExtractError($resource, $extractor, $content->count());
+                    } else {
+                        if (count($basket) > 1) {
+                            $this->rapport->addExtractError($resource, $extractor, $content->count());
+                        }
+                        $this->assignExtractedProperty($resource, $extractor, $data, $basket[0]);
+                    }
+                    break;
                 case \App\Config\Extractor::ONE:
                     if (count($basket) !== 1) {
                         $this->rapport->addExtractError($resource, $extractor, $content->count());

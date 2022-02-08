@@ -18,7 +18,7 @@ class Rapport
     /** @var string[][] */
     private array $nothingExtracted = [['Type', 'OUUID', 'URLs']];
     /** @var string[][] */
-    private array $extractErrors = [['Type', 'URL', 'Locale', 'Selector', 'Property', 'Attribute', 'Count']];
+    private array $extractErrors = [['Type', 'URL', 'Locale', 'Selector', 'Strategy', 'Property', 'Attribute', 'Count']];
     /** @var string[][] */
     private array $urlsInError = [['Doc\'s URLs', 'URLs', 'Code', 'Message']];
     private string $filename;
@@ -115,6 +115,6 @@ class Rapport
 
     public function addExtractError(WebResource $resource, Extractor $extractor, int $count): void
     {
-        $this->extractErrors[] = [$resource->getType(), $resource->getUrl(), $resource->getLocale(), $extractor->getSelector(), $extractor->getProperty(), $extractor->getAttribute() ?? '', \strval($count)];
+        $this->extractErrors[] = [$resource->getType(), $resource->getUrl(), $resource->getLocale(), $extractor->getSelector(), $extractor->getStrategy(), $extractor->getProperty(), $extractor->getAttribute() ?? '', \strval($count)];
     }
 }

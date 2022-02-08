@@ -9,6 +9,7 @@ class Extractor
     const ONE = '1';
     const ZERO_ONE = '0-1';
     const N = 'n';
+    const FIRST = 'first';
     private string $selector;
     private ?string $attribute = null;
     private string $property;
