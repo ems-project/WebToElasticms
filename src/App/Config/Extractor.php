@@ -6,11 +6,15 @@ namespace App\Config;
 
 class Extractor
 {
+    const ONE = '1';
+    const ZERO_ONE = '0-1';
+    const N = 'n';
     private string $selector;
     private ?string $attribute = null;
     private string $property;
     /** @var string[] */
     private array $filters = [];
+    private string $strategy = self::ONE;
 
     public function getSelector(): string
     {
@@ -56,5 +60,15 @@ class Extractor
     public function setAttribute(?string $attribute): void
     {
         $this->attribute = $attribute;
+    }
+
+    public function getStrategy(): string
+    {
+        return $this->strategy;
+    }
+
+    public function setStrategy(string $strategy): void
+    {
+        $this->strategy = $strategy;
     }
 }

@@ -45,20 +45,44 @@ class Html
         $this->autoDiscoverResources($crawler, $resource);
         foreach ($analyzer->getExtractors() as $extractor) {
             $content = $crawler->filter($extractor->getSelector());
-            if (1 !== $content->count()) {
-                $this->rapport->addExtractError($resource, $extractor, $content->count());
-                continue;
-            }
             $attribute = $extractor->getAttribute();
-            if (null !== $attribute) {
-                $html = $content->attr($attribute);
-                if (null !== $html) {
-                    $html = $this->applyAttrFilters($resource, $html, $extractor);
+            $basket = [];
+
+            for ($i = 0; $i < $content->count(); ++$i) {
+                $item = $content->eq($i);
+                if (null !== $attribute) {
+                    $attributeValue = $item->attr($attribute);
+                    if (null !== $attributeValue) {
+                        $basket[] = $this->applyAttrFilters($resource, $attributeValue, $extractor);
+                    }
+                } else {
+                    $basket[] = $this->applyFilters($resource, $item, $extractor, $this->rapport);
                 }
-            } else {
-                $html = $this->applyFilters($resource, $content, $extractor, $this->rapport);
             }
-            $this->assignExtractedProperty($resource, $extractor, $data, $html);
+
+            switch ($extractor->getStrategy()) {
+                case \App\Config\Extractor::ONE:
+                    if (count($basket) !== 1) {
+                        $this->rapport->addExtractError($resource, $extractor, $content->count());
+                    } else {
+                        $this->assignExtractedProperty($resource, $extractor, $data, $basket[0]);
+                    }
+                    break;
+                case \App\Config\Extractor::ZERO_ONE:
+                    if (count($basket) > 1) {
+                        $this->rapport->addExtractError($resource, $extractor, $content->count());
+                    } elseif (count($basket) === 1) {
+                        $this->assignExtractedProperty($resource, $extractor, $data, $basket[0]);
+                    }
+                    break;
+                case \App\Config\Extractor::N:
+                    if (count($basket) > 0) {
+                        $this->assignExtractedProperty($resource, $extractor, $data, $basket);
+                    }
+                    break;
+                default:
+                    throw new \RuntimeException('Not supported strategy');
+            }
         }
     }
 
