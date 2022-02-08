@@ -98,7 +98,7 @@ class EmsMigrationCommand extends AbstractCommand
         if (null !== $ouuid) {
             $ouuid = \strval($ouuid);
         }
-        $this->ouuid = \strval($ouuid);
+        $this->ouuid = $ouuid;
         $this->force = $this->getOptionBool(self::OPTION_FORCE);
         $this->continue = $this->getOptionBool(self::OPTION_CONTINUE);
         $this->dryRun = $this->getOptionBool(self::OPTION_DRY_RUN);
