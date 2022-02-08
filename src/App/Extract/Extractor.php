@@ -61,13 +61,16 @@ class Extractor
     /**
      * @return iterable<ExtractedData>
      */
-    public function extractData(Rapport $rapport): iterable
+    public function extractData(Rapport $rapport, ?string $ouuid): iterable
     {
         $lastUpdated = $this->config->getLastUpdated();
         $found = (null === $lastUpdated);
         foreach ($this->config->getDocuments() as $document) {
             if (!$found) {
                 $found = ($document->getOuuid() === $lastUpdated);
+                continue;
+            }
+            if (null !== $ouuid && $ouuid !== $document->getOuuid()) {
                 continue;
             }
             $defaultData = $document->getDefaultData();

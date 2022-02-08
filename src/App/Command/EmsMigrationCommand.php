@@ -30,6 +30,7 @@ class EmsMigrationCommand extends AbstractCommand
     private const ARG_ELASTICMS_URL = 'elasticms-url';
     private const OPTION_HASH_ALGO = 'hash-algo';
     private const OPTION_CONTINUE = 'continue';
+    private const ARG_OUUID = 'OUUID';
     private const ARG_USERNAME = 'username';
     private const ARG_PASSWORD = 'password';
     public const OPTION_CACHE_FOLDER = 'cache-folder';
@@ -49,6 +50,7 @@ class EmsMigrationCommand extends AbstractCommand
     private bool $continue;
     private bool $dryRun;
     private string $rapportsFolder;
+    private ?string $ouuid;
 
     protected function configure(): void
     {
@@ -77,6 +79,7 @@ class EmsMigrationCommand extends AbstractCommand
                 InputOption::VALUE_NONE,
                 'Continue import from last know updated document'
             )
+            ->addArgument(self::ARG_OUUID, InputArgument::OPTIONAL, 'ouuid', null)
             ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
             ->addOption(self::OPTION_FORCE, null, InputOption::VALUE_NONE, 'force update all documents')
@@ -91,6 +94,11 @@ class EmsMigrationCommand extends AbstractCommand
         $this->logger = new ConsoleLogger($output);
         $elasticmsUrl = $this->getArgumentString(self::ARG_ELASTICMS_URL);
         $this->jsonPath = $this->getArgumentString(self::ARG_CONFIG_FILE_PATH);
+        $ouuid = $input->getArgument(self::ARG_OUUID);
+        if (null !== $ouuid) {
+            $ouuid = \strval($ouuid);
+        }
+        $this->ouuid = \strval($ouuid);
         $this->force = $this->getOptionBool(self::OPTION_FORCE);
         $this->continue = $this->getOptionBool(self::OPTION_CONTINUE);
         $this->dryRun = $this->getOptionBool(self::OPTION_DRY_RUN);
@@ -164,7 +172,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->section('Start updates');
         $this->io->progressStart($extractor->extractDataCount());
         $this->io->progressAdvance($extractor->currentStep());
-        foreach ($extractor->extractData($rapport) as $extractedData) {
+        foreach ($extractor->extractData($rapport, $this->ouuid) as $extractedData) {
             $updateManager->update($extractedData, $this->force);
             $configManager->save($this->jsonPath);
             $rapport->save();
