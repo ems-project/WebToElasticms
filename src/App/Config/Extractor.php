@@ -6,10 +6,10 @@ namespace App\Config;
 
 class Extractor
 {
-    const ONE = '1';
-    const ZERO_ONE = '0-1';
-    const N = 'n';
-    const FIRST = 'first';
+    public const ONE = '1';
+    public const ZERO_ONE = '0-1';
+    public const N = 'n';
+    public const FIRST = 'first';
     private string $selector;
     private ?string $attribute = null;
     private string $property;
