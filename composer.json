@@ -1,12 +1,12 @@
 {
   "require": {
-    "symfony/console": "^4",
+    "symfony/console": "^4.4",
     "elasticms/common-bundle": "^1.8",
     "ext-sqlite3": "*",
-    "symfony/serializer": "^5.3",
+    "symfony/serializer": "^4.4",
     "phpdocumentor/reflection-docblock": "^5.3",
     "kevinrob/guzzle-cache-middleware": "^3.4",
-    "symfony/css-selector": "^5.3",
+    "symfony/css-selector": "^4.4",
     "ext-dom": "*",
     "ramsey/uuid-doctrine": "^1.8"
   },
