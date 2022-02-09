@@ -8,8 +8,10 @@ use App\Config\Extractor;
 use App\Config\WebResource;
 use App\Helper\Url;
 use EMS\CommonBundle\Common\SpreadsheetGeneratorService;
+use EMS\CommonBundle\Contracts\SpreadsheetGeneratorServiceInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class Rapport
 {
@@ -35,9 +37,10 @@ class Rapport
     public function save(): void
     {
         $config = [
-            SpreadsheetGeneratorService::WRITER => SpreadsheetGeneratorService::XLSX_WRITER,
-            SpreadsheetGeneratorService::CONTENT_FILENAME => 'WebToElasticms-Rapport.xlsx',
-            SpreadsheetGeneratorService::SHEETS => [
+            SpreadsheetGeneratorServiceInterface::CONTENT_DISPOSITION => HeaderUtils::DISPOSITION_ATTACHMENT,
+            SpreadsheetGeneratorServiceInterface::WRITER => SpreadsheetGeneratorServiceInterface::XLSX_WRITER,
+            SpreadsheetGeneratorServiceInterface::CONTENT_FILENAME => 'WebToElasticms-Rapport.xlsx',
+            SpreadsheetGeneratorServiceInterface::SHEETS => [
                 [
                     'name' => 'URLs in error',
                     'rows' => \array_values($this->urlsInError),
