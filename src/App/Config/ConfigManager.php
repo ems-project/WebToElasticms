@@ -64,6 +64,9 @@ class ConfigManager
     public static function deserialize(string $data, CacheManager $cache, CoreApi $coreApi, LoggerInterface $logger, string $format = JsonEncoder::FORMAT): ConfigManager
     {
         $config = self::getSerializer()->deserialize($data, ConfigManager::class, $format);
+        if (!$config instanceof ConfigManager) {
+            throw new \RuntimeException('Unexpected non ConfigManager object');
+        }
         $config->cacheManager = $cache;
         $config->coreApi = $coreApi;
         $config->logger = $logger;
