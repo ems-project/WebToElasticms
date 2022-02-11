@@ -12,6 +12,7 @@ use App\Update\UpdateManager;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Common\CoreApi\Client;
 use EMS\CommonBundle\Common\CoreApi\CoreApi;
+use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
@@ -36,6 +37,7 @@ class EmsMigrationCommand extends AbstractCommand
     public const OPTION_CACHE_FOLDER = 'cache-folder';
     public const OPTION_FORCE = 'force';
     public const OPTION_DRY_RUN = 'dry-run';
+    public const OPTION_DUMP = 'dump';
     public const OPTION_RAPPORTS_FOLDER = 'rapports-folder';
     protected static $defaultName = 'ems:migrate';
     private ConsoleLogger $logger;
@@ -51,6 +53,7 @@ class EmsMigrationCommand extends AbstractCommand
     private bool $dryRun;
     private string $rapportsFolder;
     private ?string $ouuid;
+    private bool $dump;
 
     protected function configure(): void
     {
@@ -84,6 +87,7 @@ class EmsMigrationCommand extends AbstractCommand
             ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
             ->addOption(self::OPTION_FORCE, null, InputOption::VALUE_NONE, 'force update all documents')
             ->addOption(self::OPTION_DRY_RUN, null, InputOption::VALUE_NONE, 'don\'t update elasticms')
+            ->addOption(self::OPTION_DUMP, null, InputOption::VALUE_NONE, 'dump computed arrays')
             ->addOption(self::OPTION_RAPPORTS_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where rapports stored', \getcwd())
             ->addOption(self::OPTION_CACHE_FOLDER, null, InputOption::VALUE_OPTIONAL, 'Path to a folder where cache will stored', \implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'WebToElasticms']));
     }
@@ -102,6 +106,7 @@ class EmsMigrationCommand extends AbstractCommand
         $this->force = $this->getOptionBool(self::OPTION_FORCE);
         $this->continue = $this->getOptionBool(self::OPTION_CONTINUE);
         $this->dryRun = $this->getOptionBool(self::OPTION_DRY_RUN);
+        $this->dump = $this->getOptionBool(self::OPTION_DUMP);
         $this->cacheFolder = $this->getOptionString(self::OPTION_CACHE_FOLDER);
         $this->rapportsFolder = $this->getOptionString(self::OPTION_RAPPORTS_FOLDER);
         $hash = $this->getOptionString(self::OPTION_HASH_ALGO);
@@ -173,6 +178,9 @@ class EmsMigrationCommand extends AbstractCommand
         $this->io->progressStart($extractor->extractDataCount());
         $this->io->progressAdvance($extractor->currentStep());
         foreach ($extractor->extractData($rapport, $this->ouuid) as $extractedData) {
+            if ($this->dump) {
+                $this->io->text(Json::encode($extractedData->getData(), true));
+            }
             $updateManager->update($extractedData, $this->force);
             $configManager->save($this->jsonPath);
             $rapport->save();
