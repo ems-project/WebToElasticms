@@ -170,7 +170,7 @@ class ConfigManager
         }
 
         $path = $this->findInDocuments($url);
-        if (null === $path && null === $url->getFragment() && null === $url->getQuery()) {
+        if (null === $path) {
             $path = $this->downloadAsset($url);
         }
         if (null === $path) {
@@ -226,7 +226,7 @@ class ConfigManager
     {
         $asset = $this->cacheManager->get($url->getUrl());
         $mimeType = $asset->getMimetype();
-        if (false !== \strpos($mimeType, 'text/html')) {
+        if ($asset->getResponse()->getStatusCode() != 200 || false !== \strpos($mimeType, 'text/html')) {
             return [];
         }
         $filename = $url->getFilename();
