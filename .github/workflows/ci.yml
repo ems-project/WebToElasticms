@@ -1,0 +1,163 @@
+name: Continuous Docker Image Build
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # everyday at 10am
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+
+  build-docker-images:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.4.0
+
+      - name: Fill GitHub Environment Variables
+        uses: FranzDiebold/github-env-vars-action@v2.3.0
+
+      - name: Fill PHP Version Environment Variable
+        uses: c-py/action-dotenv-to-setenv@v3
+        with:
+          env-file: .build.env
+
+      - name: Prepare Workflow Environment
+        id: prep
+        run: |
+          docker network create docker_default
+          docker pull appropriate/curl:latest
+          IMAGENAME=web2ems
+          DH_IMAGENAME=docker.io/elasticms/${IMAGENAME}
+          GHCR_IMAGENAME=ghcr.io/${{ github.repository_owner }}/${IMAGENAME}
+          VERSION_MAJOR_MINOR_PATCH=${{ env.APP_VERSION }}
+          VERSION_MAJOR_MINOR=${VERSION_MAJOR_MINOR_PATCH%.*}
+          VERSION_MAJOR=${VERSION_MAJOR_MINOR%.*}
+          echo ::set-output name=dh_image::${DH_IMAGENAME}
+          echo ::set-output name=ghcr_image::${GHCR_IMAGENAME}
+          echo ::set-output name=version_major_minor_patch::${VERSION_MAJOR_MINOR_PATCH}
+          echo ::set-output name=version_major_minor::${VERSION_MAJOR_MINOR}
+          echo ::set-output name=version_major::${VERSION_MAJOR}
+          echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+      - name: Fill GHCR Docker Image metadata
+        id: meta_ghcr
+        uses: crazy-max/ghaction-docker-meta@v3
+        with:
+          images: "${{ steps.prep.outputs.ghcr_image }}"
+          tags: |
+            type=edge
+            type=raw,value=${{ env.CI_SHA_SHORT }}
+            type=raw,value=${{ steps.prep.outputs.version_major_minor_patch }}
+            type=raw,value=${{ steps.prep.outputs.version_major_minor }}
+            type=raw,value=${{ steps.prep.outputs.version_major }}
+            type=raw,value=latest
+
+      - name: Fill DockerHub Docker Image metadata
+        id: meta_dh
+        uses: crazy-max/ghaction-docker-meta@v3
+        with:
+          images: "${{ steps.prep.outputs.dh_image }}"
+          tags: |
+            type=raw,value=${{ steps.prep.outputs.version_major_minor_patch }}
+            type=raw,value=${{ steps.prep.outputs.version_major_minor }}
+            type=raw,value=${{ steps.prep.outputs.version_major }}
+            type=raw,value=latest
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build GHCR Docker PHP-CLI Prod Image
+        id: build_ghcr
+        uses: docker/build-push-action@v2.7.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Dockerfile
+          build-args: |
+            VERSION_ARG=${{ env.PHP_VERSION }}
+            RELEASE_ARG=${{ env.CI_RUN_ID }}
+            VCS_REF_ARG=${{ env.CI_SHA }}
+            BUILD_DATE_ARG=${{ steps.prep.outputs.build_date }}
+          push: false
+          load: true
+          tags: ${{ steps.meta_ghcr.outputs.tags }}
+          labels: ${{ steps.meta_ghcr.outputs.labels }}
+
+      - name: Scan GHCR Docker Image
+        uses: azure/container-scan@v0
+        with:
+          image-name: "${{ steps.prep.outputs.ghcr_image }}:${{ env.CI_SHA_SHORT }}"
+
+      - name: Push GHCR PHP-CLI Prod Docker Image
+        id: push_ghcr
+        uses: docker/build-push-action@v2.7.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Dockerfile
+          build-args: |
+            VERSION_ARG=${{ env.PHP_VERSION }}
+            RELEASE_ARG=${{ env.CI_RUN_ID }}
+            VCS_REF_ARG=${{ env.CI_SHA }}
+            BUILD_DATE_ARG=${{ steps.prep.outputs.build_date }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_ghcr.outputs.tags }}
+          labels: ${{ steps.meta_ghcr.outputs.labels }}
+
+      - name: Check GHCR PHP-CLI Prod Docker Image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker buildx imagetools inspect ${{ steps.prep.outputs.ghcr_image }}:${{ steps.meta_ghcr.outputs.version }}
+
+      - name: Push DockerHub PHP-CLI Docker Prod Image
+        id: push_dh
+        uses: docker/build-push-action@v2.7.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Dockerfile
+          build-args: |
+            VERSION_ARG=${{ env.PHP_VERSION }}
+            RELEASE_ARG=${{ env.CI_RUN_ID }}
+            VCS_REF_ARG=${{ env.CI_SHA }}
+            BUILD_DATE_ARG=${{ steps.prep.outputs.build_date }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_dh.outputs.tags }}
+          labels: ${{ steps.meta_dh.outputs.labels }}
+
+      - name: Check DockerHub PHP-CLI Prod Docker Image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker buildx imagetools inspect ${{ steps.prep.outputs.dh_image }}:${{ steps.meta_dh.outputs.version }}
+          docker pull ${{ steps.prep.outputs.dh_image }}:${{ steps.prep.outputs.version_major_minor_patch }}
